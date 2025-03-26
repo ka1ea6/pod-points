@@ -1,29 +1,50 @@
 // storage-adapter-import-placeholder
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import sharp from "sharp";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 
 import { buildConfig } from "payload";
+import { Activities } from "./collections/Activities";
+import { ActivityComments } from "./collections/ActivityComments";
+import { ActivityReactions } from "./collections/ActivityReactions";
+import { Notifications } from "./collections/Notifications";
+import { Sprints } from "./collections/Sprints";
+import { Tasks } from "./collections/Tasks";
+import { Users } from "./collections/Users";
+import { Teams } from "./collections/Teams";
+
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export default buildConfig({
-  // If you'd like to use Rich Text, pass your editor here
+  admin: {
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  collections: [
+    Activities,
+    ActivityComments,
+    ActivityReactions,
+    Notifications,
+    Sprints,
+    Tasks,
+    Teams,
+    Users,
+  ],
   editor: lexicalEditor(),
-
-  // Define and configure your collections in this array
-  collections: [],
-
-  // Your Payload secret - should be a complex and secure string, unguessable
   secret: process.env.PAYLOAD_SECRET || "",
-  // Whichever Database Adapter you're using should go here
-  // Mongoose is shown as an example, but you can also use Postgres
+  typescript: {
+    outputFile: path.resolve(dirname, "payload-types.ts"),
+  },
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URI || "",
     },
   }),
-  // If you want to resize images, crop, set focal point, etc.
-  // make sure to install it and pass it to the config.
-  // This is optional - if you don't need to do these things,
-  // you don't need it!
   sharp,
 });
