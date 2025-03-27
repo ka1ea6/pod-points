@@ -17,6 +17,7 @@
   "dependencies": {
     "@hello-pangea/dnd": "latest",
     "@hookform/resolvers": "^3.9.1",
+    "@innovixx/payload-color-picker-field": "^2.0.1",
     "@payloadcms/db-sqlite": "^3.30.0",
     "@payloadcms/next": "^3.30.0",
     "@payloadcms/payload-cloud": "^3.30.0",

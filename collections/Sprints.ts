@@ -17,9 +17,17 @@ export const Sprints: CollectionConfig = {
       required: false,
     },
     {
+      name: "isActive",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
       name: "startDate",
       type: "date",
-      defaultValue: new Date(),
+      // defaultValue: new Date(),
       required: true,
       validate: (value) => {
         if (!value) return "Value is required";

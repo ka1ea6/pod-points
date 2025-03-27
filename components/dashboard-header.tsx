@@ -1,31 +1,31 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Bell, LogOut, Settings, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Bell, LogOut, Settings, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
   user: {
-    name: string
-    email: string
-    image?: string
-    role?: string
-  }
+    name: string;
+    email: string;
+    image?: string;
+    role?: string;
+  };
 }
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
-  const pathname = usePathname()
-  const isAdmin = user.role === "admin"
+  const pathname = usePathname();
+  const isAdmin = user.role === "admin";
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
@@ -43,7 +43,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             href="/"
             className={cn(
               "transition-colors hover:text-foreground/80",
-              pathname === "/" ? "text-foreground" : "text-foreground/60",
+              pathname === "/" ? "text-foreground" : "text-foreground/60"
             )}
           >
             Dashboard
@@ -52,7 +52,9 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             href="/my-pod"
             className={cn(
               "transition-colors hover:text-foreground/80",
-              pathname?.startsWith("/my-pod") ? "text-foreground" : "text-foreground/60",
+              pathname?.startsWith("/my-pod")
+                ? "text-foreground"
+                : "text-foreground/60"
             )}
           >
             My Pod
@@ -61,7 +63,9 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             href="/tasks"
             className={cn(
               "transition-colors hover:text-foreground/80",
-              pathname?.startsWith("/tasks") ? "text-foreground" : "text-foreground/60",
+              pathname?.startsWith("/tasks")
+                ? "text-foreground"
+                : "text-foreground/60"
             )}
           >
             Tasks
@@ -70,20 +74,24 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
             href="/leaderboard"
             className={cn(
               "transition-colors hover:text-foreground/80",
-              pathname?.startsWith("/leaderboard") ? "text-foreground" : "text-foreground/60",
+              pathname?.startsWith("/leaderboard")
+                ? "text-foreground"
+                : "text-foreground/60"
             )}
           >
             Leaderboard
           </Link>
           {isAdmin && (
             <Link
-              href="/admin"
+              href="/manage"
               className={cn(
                 "transition-colors hover:text-foreground/80",
-                pathname?.startsWith("/admin") ? "text-foreground" : "text-foreground/60",
+                pathname?.startsWith("/admin")
+                  ? "text-foreground"
+                  : "text-foreground/60"
               )}
             >
-              Admin
+              Manage
             </Link>
           )}
         </nav>
@@ -107,7 +115,9 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <div className="flex flex-col space-y-1 p-2">
               <p className="text-sm font-medium leading-none">{user.name}</p>
-              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
@@ -127,6 +137,5 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }
-

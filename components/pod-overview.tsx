@@ -1,23 +1,53 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { CalendarDays } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays } from "lucide-react";
+import { getAllPods } from "@/actions/pods";
+import { Pod, Sprint } from "@/payload-types";
+import { getCurrentSprint } from "@/actions/sprints";
+import { PodWithCount } from "@/lib/types";
 
 export function PodOverview() {
-  const [pods, setPods] = useState([
-    { id: 1, name: "Red Pod", color: "#ef4444", points: 320, members: 5 },
-    { id: 2, name: "Blue Pod", color: "#3b82f6", points: 280, members: 4 },
-    { id: 3, name: "Green Pod", color: "#10b981", points: 350, members: 6 },
-  ])
+  const [pods, setPods] = useState<PodWithCount[]>([]);
+  const [currentSprint, setCurrentSprint] = useState<Sprint | null>(null);
 
-  const maxPoints = Math.max(...pods.map((pod) => pod.points))
-  const daysLeft = 14
-  const userPod = pods[0] // Assuming user is in Red Pod
+  const fetchPods = useCallback(async () => {
+    const res = await getAllPods();
+    if (res.pods) setPods(res.pods);
+  }, []);
+
+  const fetchCurrentSprint = useCallback(async () => {
+    const res = await getCurrentSprint();
+    setCurrentSprint(res.sprint);
+  }, []);
+
+  useEffect(() => {
+    fetchPods();
+    fetchCurrentSprint();
+  }, []);
+
+  const maxPoints = Math.max(...pods.map((pod) => pod.points));
+  const totalPoints = pods.reduce((acc, pod) => acc + pod.points, 0);
+
+  const daysLeft = useMemo(() => {
+    if (!currentSprint) return 0;
+    const deadline = new Date(currentSprint.deadline).getTime();
+    const now = Date.now();
+
+    return Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+  }, [currentSprint]);
+  // const userPod = pods[0]; // Assuming user is in Red Pod
 
   return (
     <Card>
@@ -29,9 +59,9 @@ export function PodOverview() {
             <span>{daysLeft} days left</span>
           </Badge>
         </div>
-        <CardDescription>
+        {/* <CardDescription>
           Your pod: <span style={{ color: userPod.color }}>{userPod.name}</span>
-        </CardDescription>
+        </CardDescription> */}
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -39,17 +69,21 @@ export function PodOverview() {
             <div key={pod.id} className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: pod.color }} />
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: pod.color }}
+                  />
                   <span className="font-medium">{pod.name}</span>
                 </div>
-                <span className="text-sm">
-                  {pod.points} pts ({pod.points / pod.members} per member)
-                </span>
+                {pod.memberCount && (
+                  <span className="text-sm">
+                    {pod.points} pts ({pod.points / pod.memberCount} per member)
+                  </span>
+                )}
               </div>
               <Progress
-                value={(pod.points / maxPoints) * 100}
+                value={(pod.points / totalPoints) * 100}
                 className="h-2"
-                indicatorClassName={`bg-[${pod.color}]`}
                 style={
                   {
                     "--progress-background": pod.color,
@@ -61,6 +95,5 @@ export function PodOverview() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-

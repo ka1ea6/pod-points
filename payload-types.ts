@@ -73,7 +73,7 @@ export interface Config {
     notifications: Notification;
     sprints: Sprint;
     tasks: Task;
-    teams: Team;
+    pods: Pod;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -87,7 +87,7 @@ export interface Config {
     notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     sprints: SprintsSelect<false> | SprintsSelect<true>;
     tasks: TasksSelect<false> | TasksSelect<true>;
-    teams: TeamsSelect<false> | TeamsSelect<true>;
+    pods: PodsSelect<false> | PodsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -132,8 +132,8 @@ export interface UserAuthOperations {
 export interface Activity {
   id: number;
   user: number | User;
-  task: number | Task;
   action?: ('got-assigned' | 'completed' | 'approved' | 'rejected') | null;
+  task: number | Task;
   updatedAt: string;
   createdAt: string;
 }
@@ -145,6 +145,8 @@ export interface User {
   id: number;
   name: string;
   totalPoints?: number | null;
+  role?: ('member' | 'lead') | null;
+  pod?: (number | null) | Pod;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -158,6 +160,21 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pods".
+ */
+export interface Pod {
+  id: number;
+  name: string;
+  points: number;
+  /**
+   * Choose a color for this page
+   */
+  color: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tasks".
  */
 export interface Task {
@@ -168,6 +185,8 @@ export interface Task {
   points: number;
   status: 'available' | 'in-progress' | 'completed' | 'approved';
   assignee?: (number | null) | User;
+  assignedBy?: (number | null) | User;
+  isRecurring?: boolean | null;
   sprint?: (number | null) | Sprint;
   updatedAt: string;
   createdAt: string;
@@ -180,6 +199,7 @@ export interface Sprint {
   id: number;
   title: string;
   description?: string | null;
+  isActive?: boolean | null;
   startDate: string;
   deadline: string;
   updatedAt: string;
@@ -192,8 +212,8 @@ export interface Sprint {
 export interface ActivityComment {
   id: number;
   user: number | User;
-  task: number | Task;
-  action: 'completed' | 'approved' | 'rejected';
+  activity: number | Activity;
+  comment: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -219,18 +239,6 @@ export interface Notification {
   description?: string | null;
   addressedTo: number | User;
   link?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "teams".
- */
-export interface Team {
-  id: number;
-  name: string;
-  color?: string | null;
-  members?: (number | User)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -266,8 +274,8 @@ export interface PayloadLockedDocument {
         value: number | Task;
       } | null)
     | ({
-        relationTo: 'teams';
-        value: number | Team;
+        relationTo: 'pods';
+        value: number | Pod;
       } | null)
     | ({
         relationTo: 'users';
@@ -321,8 +329,8 @@ export interface PayloadMigration {
  */
 export interface ActivitiesSelect<T extends boolean = true> {
   user?: T;
-  task?: T;
   action?: T;
+  task?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -332,8 +340,8 @@ export interface ActivitiesSelect<T extends boolean = true> {
  */
 export interface ActivityCommentsSelect<T extends boolean = true> {
   user?: T;
-  task?: T;
-  action?: T;
+  activity?: T;
+  comment?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -367,6 +375,7 @@ export interface NotificationsSelect<T extends boolean = true> {
 export interface SprintsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  isActive?: T;
   startDate?: T;
   deadline?: T;
   updatedAt?: T;
@@ -383,18 +392,20 @@ export interface TasksSelect<T extends boolean = true> {
   points?: T;
   status?: T;
   assignee?: T;
+  assignedBy?: T;
+  isRecurring?: T;
   sprint?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "teams_select".
+ * via the `definition` "pods_select".
  */
-export interface TeamsSelect<T extends boolean = true> {
+export interface PodsSelect<T extends boolean = true> {
   name?: T;
+  points?: T;
   color?: T;
-  members?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -405,6 +416,8 @@ export interface TeamsSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   totalPoints?: T;
+  role?: T;
+  pod?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

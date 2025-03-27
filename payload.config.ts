@@ -14,7 +14,7 @@ import { Notifications } from "./collections/Notifications";
 import { Sprints } from "./collections/Sprints";
 import { Tasks } from "./collections/Tasks";
 import { Users } from "./collections/Users";
-import { Teams } from "./collections/Teams";
+import { Pods } from "./collections/Pods";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -33,7 +33,7 @@ export default buildConfig({
     Notifications,
     Sprints,
     Tasks,
-    Teams,
+    Pods,
     Users,
   ],
   editor: lexicalEditor(),

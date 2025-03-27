@@ -10,12 +10,6 @@ export const Activities: CollectionConfig = {
       required: true,
     },
     {
-      name: "task",
-      type: "relationship",
-      relationTo: "tasks",
-      required: true,
-    },
-    {
       name: "action",
       type: "select",
       options: [
@@ -25,6 +19,12 @@ export const Activities: CollectionConfig = {
         { label: "Rejected", value: "rejected" },
       ],
       required: false,
+    },
+    {
+      name: "task",
+      type: "relationship",
+      relationTo: "tasks",
+      required: true,
     },
   ],
 };

@@ -18,5 +18,25 @@ export const Users: CollectionConfig = {
       type: "number",
       defaultValue: 0,
     },
+    {
+      name: "role",
+      type: "select",
+      options: [
+        {
+          label: "Member",
+          value: "member",
+        },
+        {
+          label: "Lead",
+          value: "lead",
+        },
+      ],
+      // defaultValue: "member",
+    },
+    {
+      name: "pod",
+      type: "relationship",
+      relationTo: "pods",
+    },
   ],
 };

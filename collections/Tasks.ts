@@ -49,11 +49,25 @@ export const Tasks: CollectionConfig = {
       type: "relationship",
       relationTo: "users",
     },
-    // we'll have a sprint field to keep track of the sprints
+    {
+      name: "isRecurring",
+      type: "checkbox",
+      admin: {
+        position: "sidebar",
+      },
+      defaultValue: false,
+    },
     {
       name: "sprint",
       type: "relationship",
       relationTo: "sprints",
+      admin: {
+        position: "sidebar",
+
+        condition: (_, siblingData) => {
+          return !siblingData.isRecurring;
+        },
+      },
       // required: true,
     },
   ],
