@@ -26,6 +26,7 @@ export const Pods: CollectionConfig = {
       name: "color",
       label: "Color",
       required: true,
+      unique: true,
       admin: {
         position: "sidebar",
         description: "Choose a color for this page",

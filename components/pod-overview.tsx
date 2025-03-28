@@ -75,11 +75,13 @@ export function PodOverview() {
                   />
                   <span className="font-medium">{pod.name}</span>
                 </div>
-                {pod.memberCount && (
+                {
                   <span className="text-sm">
-                    {pod.points} pts ({pod.points / pod.memberCount} per member)
+                    {pod.points} pts (
+                    {pod.memberCount ? pod.points / pod.memberCount : 0} per
+                    member)
                   </span>
-                )}
+                }
               </div>
               <Progress
                 value={(pod.points / totalPoints) * 100}

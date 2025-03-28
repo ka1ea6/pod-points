@@ -1,13 +1,13 @@
-import { redirect } from "next/navigation"
-import { AdminDashboard } from "@/components/admin-dashboard"
-import { DashboardHeader } from "@/components/dashboard-header"
-import { getCurrentUser } from "@/lib/auth"
+import { redirect } from "next/navigation";
+import { DashboardHeader } from "@/components/dashboard-header";
+import { getCurrentUser } from "@/lib/auth";
+import { AdminDashboard } from "@/components/admin-dashboard";
 
 export default function AdminPage() {
-  const user = getCurrentUser()
+  const user = getCurrentUser();
 
   if (!user || user.role !== "admin") {
-    redirect("/")
+    redirect("/");
   }
 
   return (
@@ -17,6 +17,5 @@ export default function AdminPage() {
         <AdminDashboard />
       </main>
     </div>
-  )
+  );
 }
-
