@@ -27,12 +27,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Heading1, PlusCircle } from "lucide-react";
 import { getAllPods } from "@/actions/pods";
-import { getAllMembers } from "@/actions/users";
+import { changeMemberPod, getAllMembers } from "@/actions/users";
 import { Pod, User } from "@/payload-types";
+import AddMemberDialog from "./add-member";
+import { toast } from "sonner";
+import AwardPointsDialog from "./award-points";
 
 const MembersTab = () => {
   const [members, setMembers] = useState<User[]>([]);
   const [pods, setPods] = useState<Pod[]>([]);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
+  const [awardMemberOpen, setAwardMemberOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
 
   const fetchMembers = useCallback(async () => {
     const { members } = await getAllMembers();
@@ -42,6 +48,11 @@ const MembersTab = () => {
   const fetchPods = useCallback(async () => {
     const { pods } = await getAllPods();
     setPods(pods);
+  }, []);
+
+  const handlePodChange = useCallback(async (userId: number, podId: number) => {
+    const { member } = await changeMemberPod(userId, podId);
+    toast.success(`${member.name} added to pod '${member.pod?.name}'`);
   }, []);
 
   useEffect(() => {
@@ -59,10 +70,11 @@ const MembersTab = () => {
               Add members to pods and manage their roles
             </CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => setAddMemberOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add New Member
           </Button>
+          <AddMemberDialog open={addMemberOpen} setOpen={setAddMemberOpen} />
         </div>
       </CardHeader>
       <CardContent>
@@ -90,6 +102,9 @@ const MembersTab = () => {
                         ? member.pod.toString()
                         : member.pod?.id.toString()
                     }
+                    onValueChange={(value) => {
+                      handlePodChange(member.id, parseInt(value));
+                    }}
                   >
                     <SelectTrigger className="w-[140px]">
                       <SelectValue placeholder="Select pod" />
@@ -114,10 +129,17 @@ const MembersTab = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline">
+                    {/* <Button size="sm" variant="outline">
                       Edit
-                    </Button>
-                    <Button size="sm" variant="outline">
+                    </Button> */}
+                    <Button
+                      onClick={() => {
+                        setSelectedMemberId(member.id);
+                        setAwardMemberOpen(true);
+                      }}
+                      size="sm"
+                      variant="outline"
+                    >
                       Award Points
                     </Button>
                   </div>
@@ -126,6 +148,13 @@ const MembersTab = () => {
             ))}
           </TableBody>
         </Table>
+        {selectedMemberId && (
+          <AwardPointsDialog
+            open={awardMemberOpen}
+            setOpen={setAwardMemberOpen}
+            userId={selectedMemberId}
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -55,7 +55,6 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log("state", state);
     if (state && state.status === "success") {
       setOpen(false);
       toast.success("Pod updated successfully");
