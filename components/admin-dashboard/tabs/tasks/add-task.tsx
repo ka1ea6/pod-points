@@ -108,7 +108,7 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
               <Label htmlFor="points" className="text-right">
                 Assignee
               </Label>
-              <Select defaultValue={""}>
+              <Select name="assignee">
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>

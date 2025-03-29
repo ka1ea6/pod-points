@@ -61,11 +61,13 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
     }
   }, [state]);
 
+  console.log("task", task);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
         <form action={formAction}>
           <input type="hidden" name="userId" value={1} />
@@ -128,7 +130,14 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               <Label htmlFor="points" className="text-right">
                 Assignee
               </Label>
-              <Select defaultValue={task.assignee?.toString()}>
+              <Select
+                name="assignee"
+                defaultValue={
+                  typeof task.assignee === "number"
+                    ? task.assignee.toString()
+                    : task.assignee?.id.toString()
+                }
+              >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>

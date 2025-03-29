@@ -38,10 +38,16 @@ const TasksTab = () => {
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [editTaskOpen, setEditTaskOpen] = useState(false);
   const [deleteTaskOpen, setDeleteTaskOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const fetchTasks = useCallback(async () => {
     const { docs: tasks } = await getAllTasks();
     setTasks(tasks);
+  }, []);
+
+  const handleAlterTask = useCallback((task: Task, mode: "edit" | "delete") => {
+    setSelectedTask(task);
+    mode === "edit" ? setEditTaskOpen(true) : setDeleteTaskOpen(true);
   }, []);
 
   useEffect(() => {
@@ -63,7 +69,9 @@ const TasksTab = () => {
               <PlusCircle className="mr-2 h-4 w-4" />
               Add New Task
             </Button>
-            <AddTaskDialog open={addTaskOpen} setOpen={setAddTaskOpen} />
+            {addTaskOpen && (
+              <AddTaskDialog open={addTaskOpen} setOpen={setAddTaskOpen} />
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -87,34 +95,23 @@ const TasksTab = () => {
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
-                        onClick={() => setEditTaskOpen(true)}
+                        onClick={() => handleAlterTask(task, "edit")}
                         size="sm"
                         variant="outline"
                       >
                         Edit
                       </Button>
-                      <EditTaskDialog
-                        open={editTaskOpen}
-                        setOpen={setEditTaskOpen}
-                        task={task}
-                        userId={1}
-                      />
+
                       {task.status === "available" && (
                         <>
                           <Button
-                            onClick={() => setDeleteTaskOpen(true)}
+                            onClick={() => handleAlterTask(task, "delete")}
                             size="sm"
                             variant="outline"
                             className="text-red-500"
                           >
                             Delete
                           </Button>
-                          <DeleteTaskDialog
-                            open={deleteTaskOpen}
-                            setOpen={setDeleteTaskOpen}
-                            taskId={task.id}
-                            userId={1}
-                          />
                         </>
                       )}
                     </div>
@@ -123,6 +120,22 @@ const TasksTab = () => {
               ))}
             </TableBody>
           </Table>
+          {editTaskOpen && selectedTask && (
+            <EditTaskDialog
+              open={editTaskOpen}
+              setOpen={setEditTaskOpen}
+              task={selectedTask}
+              userId={1}
+            />
+          )}
+          {deleteTaskOpen && selectedTask && (
+            <DeleteTaskDialog
+              open={deleteTaskOpen}
+              setOpen={setDeleteTaskOpen}
+              taskId={selectedTask.id}
+              userId={1}
+            />
+          )}
           {tasks.length === 0 && (
             <div className="flex justify-center py-4">
               <span className="font-bold text-lg">No tasks yet.</span>

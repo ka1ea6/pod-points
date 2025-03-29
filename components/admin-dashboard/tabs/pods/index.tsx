@@ -145,7 +145,7 @@ const PodsTab = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Set Reward Period</CardTitle>
           <CardDescription>
@@ -179,7 +179,7 @@ const PodsTab = () => {
             <Button className="self-end">Save</Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </>
   );
 };
