@@ -75,6 +75,7 @@ export interface Config {
     tasks: Task;
     pods: Pod;
     users: User;
+    requests: Request;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,6 +90,7 @@ export interface Config {
     tasks: TasksSelect<false> | TasksSelect<true>;
     pods: PodsSelect<false> | PodsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    requests: RequestsSelect<false> | RequestsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -244,6 +246,22 @@ export interface Notification {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "requests".
+ */
+export interface Request {
+  id: number;
+  requestBy: number | User;
+  actionBy?: (number | null) | User;
+  status: 'requested' | 'approved' | 'rejected';
+  title: string;
+  points: number;
+  evidence: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -280,6 +298,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'requests';
+        value: number | Request;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -427,6 +449,21 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "requests_select".
+ */
+export interface RequestsSelect<T extends boolean = true> {
+  requestBy?: T;
+  actionBy?: T;
+  status?: T;
+  title?: T;
+  points?: T;
+  evidence?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

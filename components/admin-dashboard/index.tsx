@@ -5,6 +5,7 @@ import RequestsTab from "./tabs/requests";
 import PodsTab from "./tabs/pods";
 import TasksTab from "./tabs/tasks";
 import MembersTab from "./tabs/members";
+import SprintsTab from "./tabs/sprints";
 
 export function AdminDashboard() {
   return (
@@ -13,9 +14,10 @@ export function AdminDashboard() {
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <TabsList>
           <TabsTrigger value="requests">Pending Requests</TabsTrigger>
-          <TabsTrigger value="pods">Manage Pods</TabsTrigger>
-          <TabsTrigger value="tasks">Manage Tasks</TabsTrigger>
-          <TabsTrigger value="members">Manage Members</TabsTrigger>
+          <TabsTrigger value="pods">Pods</TabsTrigger>
+          <TabsTrigger value="sprints">Sprints</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
         </TabsList>
       </div>
 
@@ -25,6 +27,10 @@ export function AdminDashboard() {
 
       <TabsContent value="pods" className="space-y-4">
         <PodsTab />
+      </TabsContent>
+
+      <TabsContent value="sprints" className="space-y-4">
+        <SprintsTab />
       </TabsContent>
 
       <TabsContent value="tasks" className="space-y-4">

@@ -29,6 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, LinkIcon } from "lucide-react";
 import { getAllTasks } from "@/actions/tasks";
 import { Task } from "@/payload-types";
+import RequestPointsDialog from "./request-points-dialog";
 
 // type Task = {
 //   id: string;
@@ -183,98 +184,20 @@ export function TaskBoard() {
             <CardTitle>Task Board</CardTitle>
             <CardDescription>Drag tasks to change their status</CardDescription>
           </div>
-          <Dialog
-            open={isRequestModalOpen}
-            onOpenChange={setIsRequestModalOpen}
+          <Button
+            onClick={() => {
+              setIsRequestModalOpen(true);
+            }}
+            size="sm"
           >
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Request Points
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Request Points</DialogTitle>
-                <DialogDescription>
-                  Submit a request for points for a completed task.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handlePointRequest}>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="taskTitle" className="text-right">
-                      Task
-                    </Label>
-                    <Input
-                      id="taskTitle"
-                      value={pointRequest.taskTitle}
-                      onChange={(e) =>
-                        setPointRequest({
-                          ...pointRequest,
-                          taskTitle: e.target.value,
-                        })
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="points" className="text-right">
-                      Points
-                    </Label>
-                    <Input
-                      id="points"
-                      type="number"
-                      value={pointRequest.points}
-                      onChange={(e) =>
-                        setPointRequest({
-                          ...pointRequest,
-                          points: Number.parseInt(e.target.value),
-                        })
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">
-                      Description
-                    </Label>
-                    <Textarea
-                      id="description"
-                      value={pointRequest.description}
-                      onChange={(e) =>
-                        setPointRequest({
-                          ...pointRequest,
-                          description: e.target.value,
-                        })
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="evidence" className="text-right">
-                      Evidence
-                    </Label>
-                    <Input
-                      id="evidence"
-                      value={pointRequest.evidence}
-                      onChange={(e) =>
-                        setPointRequest({
-                          ...pointRequest,
-                          evidence: e.target.value,
-                        })
-                      }
-                      className="col-span-3"
-                      placeholder="Link or description of evidence"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Submit Request</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+            <Plus className="mr-2 h-4 w-4" />
+            Request Points
+          </Button>
+          <RequestPointsDialog
+            open={isRequestModalOpen}
+            setOpen={setIsRequestModalOpen}
+            userId={1}
+          />
         </div>
       </CardHeader>
       <CardContent>

@@ -49,7 +49,6 @@ const AddMemberDialog: React.FC<AddMemberDialogProps> = ({ open, setOpen }) => {
   }, []);
 
   useEffect(() => {
-    console.log("state", state);
     if (state && state.status === "success") {
       setUserCreated(true);
       // setOpen(false);

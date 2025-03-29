@@ -17,45 +17,44 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle, XCircle } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { changeRequestStatus, getPendingRequests } from "@/actions/requests";
+import { Request } from "@/payload-types";
+import { toast } from "sonner";
 
 const RequestsTab = () => {
-  const [pendingRequests, setPendingRequests] = useState([
-    {
-      id: 1,
-      user: {
-        name: "Alex Johnson",
-        avatar: "/placeholder.svg?height=32&width=32",
-        pod: { name: "Red Pod", color: "#ef4444" },
-      },
-      task: "Client presentation",
-      points: 15,
-      evidence: "https://docs.example.com/presentation",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    },
-    {
-      id: 2,
-      user: {
-        name: "Sam Taylor",
-        avatar: "/placeholder.svg?height=32&width=32",
-        pod: { name: "Blue Pod", color: "#3b82f6" },
-      },
-      task: "Bug fix in production",
-      points: 12,
-      evidence: "https://github.com/example/repo/pull/123",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    },
-  ]);
+  const [pendingRequests, setPendingRequests] = useState<Request[]>([]);
 
-  const handleApprove = (id: number) => {
-    setPendingRequests(pendingRequests.filter((request) => request.id !== id));
+  const fetchPendingRequests = useCallback(async () => {
+    const res = await getPendingRequests();
+    setPendingRequests(res.requests);
+  }, []);
+
+  useEffect(() => {
+    fetchPendingRequests();
+  }, []);
+
+  const handleApprove = useCallback(async (id: number) => {
+    const { request, status } = await changeRequestStatus(id, 1, "approved");
+    if (status === "success") {
+      toast.success(
+        `Request by ${request.requestBy.name} for task ${request.title} has been approved`
+      );
+    }
+    // setPendingRequests(pendingRequests.filter((request) => request.id !== id));
     // In a real app, you would also update the user's points and pod points
-  };
+  }, []);
 
-  const handleReject = (id: number) => {
-    setPendingRequests(pendingRequests.filter((request) => request.id !== id));
+  const handleReject = useCallback(async (id: number) => {
+    const { request, status } = await changeRequestStatus(id, 1, "rejected");
+    if (status === "success") {
+      toast.error(
+        `Request by ${request.requestBy.name} for task ${request.title} has been rejected`
+      );
+    }
+
     // In a real app, you would also notify the user
-  };
+  }, []);
 
   return (
     <Card>
@@ -92,25 +91,27 @@ const RequestsTab = () => {
                     <div className="flex items-center gap-2">
                       <Avatar
                         className="h-8 w-8 border-2"
-                        style={{ borderColor: request.user.pod.color }}
+                        style={{ borderColor: request.requestBy.pod?.color }}
                       >
                         <AvatarImage
-                          src={request.user.avatar}
-                          alt={request.user.name}
+                          // src={request.requestBy.avatar}
+                          alt={request.requestBy.name}
                         />
                         <AvatarFallback>
-                          {request.user.name.charAt(0)}
+                          {request.requestBy.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium">{request.user.name}</div>
+                        <div className="font-medium">
+                          {request.requestBy.name}
+                        </div>
                         <div className="text-xs text-muted-foreground">
-                          {request.user.pod.name}
+                          {request.requestBy.pod?.name}
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{request.task}</TableCell>
+                  <TableCell>{request.title}</TableCell>
                   <TableCell>
                     <Badge variant="outline">+{request.points}</Badge>
                   </TableCell>
