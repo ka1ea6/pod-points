@@ -23,6 +23,14 @@ export const Notifications: CollectionConfig = {
       required: true,
     },
     {
+      name: "seen",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+      },
+    },
+    {
       name: "link",
       type: "text",
       required: false,

@@ -61,8 +61,6 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
     }
   }, [state]);
 
-  console.log("task", task);
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
@@ -142,6 +140,11 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={" "}>
+                    <div className="flex items-center gap-2">
+                      <span>No assignee</span>
+                    </div>
+                  </SelectItem>
                   {members.map((member) => (
                     <SelectItem key={member.id} value={member.id.toString()}>
                       <div className="flex items-center gap-2">

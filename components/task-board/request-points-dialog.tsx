@@ -39,8 +39,8 @@ const RequestPointsDialog: React.FC<RequestPointsDialogProps> = ({
   useEffect(() => {
     if (state && state.status === "success") {
       // setOpen(false);
-      toast.success("User created successfully", {
-        description: "Copy over the password and have the user login",
+      toast.success("Point request sent", {
+        description: "Your request has been successfully sent.",
       });
     }
   }, [state]);

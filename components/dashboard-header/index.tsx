@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import Notifications from "./notifications";
 
 interface DashboardHeaderProps {
   user: {
@@ -97,12 +98,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
         </nav>
       </div>
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-            3
-          </span>
-        </Button>
+        <Notifications />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">

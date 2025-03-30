@@ -227,7 +227,7 @@ export interface ActivityReaction {
   id: number;
   user: number | User;
   activity: number | Activity;
-  reaction?: ('acknowledge' | 'Like') | null;
+  reaction?: ('like' | 'heart') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -240,6 +240,7 @@ export interface Notification {
   title: string;
   description?: string | null;
   addressedTo: number | User;
+  seen?: boolean | null;
   link?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -386,6 +387,7 @@ export interface NotificationsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   addressedTo?: T;
+  seen?: T;
   link?: T;
   updatedAt?: T;
   createdAt?: T;

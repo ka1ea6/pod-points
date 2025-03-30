@@ -80,6 +80,7 @@ const TasksTab = () => {
               <TableRow>
                 <TableHead>Task Name</TableHead>
                 <TableHead>Points</TableHead>
+                <TableHead>Assigned to</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -91,6 +92,9 @@ const TasksTab = () => {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">+{task.points}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span>{task.assignee.name}</span>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

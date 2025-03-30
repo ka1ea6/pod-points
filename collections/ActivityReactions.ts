@@ -19,8 +19,8 @@ export const ActivityReactions: CollectionConfig = {
       name: "reaction",
       type: "select",
       options: [
-        { label: "👍", value: "acknowledge" },
-        { label: "❤️", value: "Like" },
+        { label: "👍", value: "like" },
+        { label: "❤️", value: "heart" },
       ],
     },
   ],
