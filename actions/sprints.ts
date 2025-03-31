@@ -57,6 +57,20 @@ export async function getCurrentSprint() {
 
   return { sprint: null };
 }
+export async function getLastSprint() {
+  const payload = await getPayload({ config });
+
+  const sprint = await payload.find({
+    collection: "sprints",
+    depth: 2,
+    limit: 1,
+    sort: "-deadline",
+  });
+
+  if (sprint.docs && sprint.docs.length > 0) return { sprint: sprint.docs[0] };
+
+  return { sprint: null };
+}
 
 export async function getAllSprints() {
   const payload = await getPayload({ config });

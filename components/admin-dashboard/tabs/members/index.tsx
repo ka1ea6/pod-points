@@ -110,6 +110,7 @@ const MembersTab = () => {
                       <SelectValue placeholder="Select pod" />
                     </SelectTrigger>
                     <SelectContent>
+                      {/* <SelectItem value=" ">Select Pod</SelectItem> */}
                       {pods.map((pod) => (
                         <SelectItem key={pod.id} value={pod.id.toString()}>
                           <div className="flex items-center gap-2">

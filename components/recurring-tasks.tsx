@@ -81,27 +81,33 @@ export function RecurringTasks() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {recurringTasks.map((task) => (
-            <Card
-              key={task.id}
-              className="cursor-pointer"
-              onClick={() => handleTaskClick(task)}
-            >
-              <CardHeader className="p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{task.title}</CardTitle>
-                  <Badge variant="secondary">+{task.points}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <p className="text-sm text-muted-foreground">
-                  {task.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {recurringTasks.length === 0 ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="font-bold">No recurring tasks available</span>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {recurringTasks.map((task) => (
+              <Card
+                key={task.id}
+                className="cursor-pointer"
+                onClick={() => handleTaskClick(task)}
+              >
+                <CardHeader className="p-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">{task.title}</CardTitle>
+                    <Badge variant="secondary">+{task.points}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <p className="text-sm text-muted-foreground">
+                    {task.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">

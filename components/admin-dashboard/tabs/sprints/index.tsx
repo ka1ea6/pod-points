@@ -179,6 +179,12 @@ const SprintsTab = () => {
                 ))}
             </TableBody>
           </Table>
+          {sprints.length === 0 && (
+            <div className="flex justify-center py-4">
+              <span className="font-bold text-lg">No sprints yet.</span>
+            </div>
+          )}
+
           {selectedSprint && changeDateRangeOpen && (
             <ExtendDeadlineDialog
               open={changeDateRangeOpen}

@@ -142,6 +142,11 @@ const PodsTab = () => {
               )}
             </TableBody>
           </Table>
+          {pods.length === 0 && (
+            <div className="flex justify-center py-4">
+              <span className="font-bold text-lg">No Pods yet.</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 
