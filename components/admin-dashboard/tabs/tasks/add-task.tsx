@@ -28,6 +28,7 @@ import {
 import { Pod, User } from "@/payload-types";
 import { getAllMembers } from "@/actions/users";
 import { createTask } from "@/actions/tasks";
+import { useAuth } from "@/providers/auth";
 
 interface AddTaskDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ interface AddTaskDialogProps {
 const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
   const [state, formAction] = useActionState(createTask, {} as any);
   const [members, setMembers] = useState<User[]>([]);
+  const { user } = useAuth();
 
   const fetchMembers = useCallback(async () => {
     const { members } = await getAllMembers();
@@ -50,7 +52,7 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
   useEffect(() => {
     if (state && state.status === "success") {
       setOpen(false);
-      toast.success("Pod created successfully");
+      toast.success("Task created successfully");
     }
   }, [state]);
 
@@ -61,7 +63,7 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
           <DialogTitle>Add Task</DialogTitle>
         </DialogHeader>
         <form action={formAction}>
-          <input type="hidden" name="userId" value={1} />
+          <input type="hidden" name="userId" value={user?.id} />
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="title" className="text-right">

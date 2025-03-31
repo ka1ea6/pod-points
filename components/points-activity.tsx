@@ -22,21 +22,28 @@ import { addComment, getActivityComments } from "@/actions/activityComments";
 import { formatDate } from "@/lib/formatters";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
+import { useAuth } from "@/providers/auth";
 
 export function PointsActivity() {
   const [state, formAction] = useActionState(addComment, {} as any);
   const [activities, setActivities] = useState<
     ActivityWithReactionAndCommentCount[]
   >([]);
+  const [commentViewMap, setCommentViewMap] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const [comments, setComments] = useState<Record<number, ActivityComment[]>>(
     {}
   );
 
+  const { user: currUser } = useAuth();
+
   const fetchActivities = useCallback(async () => {
-    const res = await getAllUserActivities(1);
+    if (!currUser) return;
+    const res = await getAllUserActivities(currUser.id);
     if (res && res.activities) setActivities(res.activities);
-  }, []);
+  }, [currUser]);
 
   const fetchActivityComments = useCallback(async (activityId: number) => {
     const res = await getActivityComments(activityId);
@@ -57,9 +64,27 @@ export function PointsActivity() {
     }
   }, [state]);
 
+  const toggleCommentView = useCallback((activityId: number) => {
+    setCommentViewMap((prev) => {
+      const copy = { ...prev };
+      if (Object.keys(copy).includes(activityId.toString())) {
+        copy[activityId] = !copy[activityId];
+      } else {
+        copy[activityId] = true;
+      }
+
+      return copy;
+    });
+  }, []);
+
+  const handleCommentToggle = useCallback((activityId: number) => {
+    toggleCommentView(activityId);
+    fetchActivityComments(activityId);
+  }, []);
+
   const addReaction = useCallback(
     async (activityId: number, reaction: ActivityReaction["reaction"]) => {
-      if (!reaction) return;
+      if (!reaction || !currUser) return;
       setActivities((prev) => {
         const copy = [...prev];
         const mapped = copy.map((el) => {
@@ -77,11 +102,11 @@ export function PointsActivity() {
       });
       const res = await addActivityReaction({
         activityId,
-        userId: 1,
+        userId: currUser.id,
         reaction,
       });
     },
-    []
+    [currUser]
   );
 
   useEffect(() => {
@@ -89,17 +114,17 @@ export function PointsActivity() {
   }, []);
 
   return (
-    <Card>
+    <Card className="h-100 flex flex-col">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
         <CardDescription>See what your team has been up to</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className=" flex-1  overflow-y-scroll">
         <div className="space-y-4">
           {activities.map((activity) => {
             const user = activity.user as User;
             return (
-              <div className="flex flex-col">
+              <div key={activity.id} className="flex flex-col">
                 <div key={activity.id} className="flex gap-3">
                   <Avatar
                     className="h-8 w-8 border-2"
@@ -120,16 +145,14 @@ export function PointsActivity() {
                       <span className="text-muted-foreground">
                         {activity.action}
                       </span>
-                      {activity.task && typeof activity.task !== "number" && (
-                        <span className="font-medium">
-                          "{activity.task.title}"
-                        </span>
+                      {activity.title && (
+                        <span className="font-medium">{activity.title}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      {activity.task && typeof activity.task !== "number" && (
+                      {activity.points && (
                         <Badge variant="secondary" className="text-xs">
-                          +{activity.task.points} points
+                          +{activity.points} points
                         </Badge>
                       )}
                       <span className="text-xs text-muted-foreground">
@@ -179,7 +202,7 @@ export function PointsActivity() {
                         variant="ghost"
                         size="sm"
                         className="h-7 px-2 text-muted-foreground"
-                        onClick={() => fetchActivityComments(activity.id)}
+                        onClick={() => handleCommentToggle(activity.id)}
                       >
                         <MessageSquare className="mr-1 h-3.5 w-3.5" />
                         <span className="text-xs">{activity.commentCount}</span>
@@ -187,11 +210,14 @@ export function PointsActivity() {
                     </div>
                   </div>
                 </div>
-                {Object.keys(comments).includes(activity.id.toString()) && (
+                {commentViewMap[activity.id] && (
                   <ul className="flex flex-col gap-3">
-                    {comments[activity.id].map((comment) => {
+                    {comments[activity.id]?.map((comment) => {
                       return (
-                        <li className="w-[calc(100%-5rem)] text-justify min-h-10 ml-16 flex flex-col gap-1">
+                        <li
+                          key={comment.id}
+                          className="w-[calc(100%-5rem)] text-justify min-h-10 ml-16 flex flex-col gap-1"
+                        >
                           <div className="flex gap-2 items-center">
                             <Avatar className="h-4 w-4 border">
                               <AvatarImage
@@ -227,7 +253,11 @@ export function PointsActivity() {
                           name="activityId"
                           value={activity.id}
                         />
-                        <input type="hidden" name="userId" value={1} />
+                        <input
+                          type="hidden"
+                          name="userId"
+                          value={currUser?.id}
+                        />
                         <Input type="text" name="comment" />
                         <div className="w-full flex justify-end">
                           <Button variant={"default"} size={"sm"}>

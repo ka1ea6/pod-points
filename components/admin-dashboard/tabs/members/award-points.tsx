@@ -8,39 +8,31 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dispatch,
-  SetStateAction,
-  useActionState,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { toast } from "sonner";
-import { awardPoints, createMember } from "@/actions/users";
-import { getAllPods } from "@/actions/pods";
-import { Pod } from "@/payload-types";
+import { awardPoints } from "@/actions/users";
+import { useAuth } from "@/providers/auth";
 
 interface AwardPointsDialogProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  userId: number;
 }
 
 const AwardPointsDialog: React.FC<AwardPointsDialogProps> = ({
   open,
   setOpen,
-  userId,
 }) => {
   const [points, setPoints] = useState(0);
+  const { user } = useAuth();
 
   const giftPoint = useCallback(async () => {
-    const res = await awardPoints(userId, points);
+    if (!user) return;
+    const res = await awardPoints(user?.id, points);
     if (res && res.status === "success") {
       setOpen(false);
       toast.success(`${res.member.name} has been awarded ${points} points`);
     }
-  }, [userId, points]);
+  }, [user, points]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -49,7 +41,6 @@ const AwardPointsDialog: React.FC<AwardPointsDialogProps> = ({
           <DialogTitle>Award points</DialogTitle>
         </DialogHeader>
         <div>
-          <input type="hidden" name="userId" value={userId} />
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="points" className="text-right">

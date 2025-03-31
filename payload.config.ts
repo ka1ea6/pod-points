@@ -16,6 +16,7 @@ import { Tasks } from "./collections/Tasks";
 import { Users } from "./collections/Users";
 import { Pods } from "./collections/Pods";
 import { Requests } from "./collections/Requests";
+import { websocket } from "./services";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -49,4 +50,12 @@ export default buildConfig({
     },
   }),
   sharp,
+  onInit: () => {
+    websocket.initialize(
+      { cors: { origin: "*" } }, // Adjust CORS for production
+      process.env.WEBSOCKET_PORT ? parseInt(process.env.WEBSOCKET_PORT) : 3001
+    );
+
+    // console.log("onInit end:", Date.now());
+  },
 });

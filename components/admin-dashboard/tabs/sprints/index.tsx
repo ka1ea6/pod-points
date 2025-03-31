@@ -27,8 +27,11 @@ import EndSprintDialog from "./end-sprint";
 import ActivateSprintDialog from "./activate-sprint";
 import { formatDate } from "@/lib/formatters";
 import AddSprintDialog from "./add-sprint";
+import { useAuth } from "@/providers/auth";
 
 const SprintsTab = () => {
+  const { user } = useAuth();
+
   const [sprints, setSprints] = useState<SprintWithTaskCount[]>([]);
   const [selectedSprint, setSelectedSprint] =
     useState<SprintWithTaskCount | null>();
@@ -183,20 +186,20 @@ const SprintsTab = () => {
               sprint={selectedSprint}
             />
           )}
-          {selectedSprint && endSprintOpen && (
+          {selectedSprint && endSprintOpen && user && (
             <EndSprintDialog
               open={endSprintOpen}
               setOpen={setEndSprintOpen}
               sprintId={selectedSprint.id}
-              userId={1}
+              userId={user.id}
             />
           )}
-          {selectedSprint && activateSprintOpen && (
+          {selectedSprint && activateSprintOpen && user && (
             <ActivateSprintDialog
               open={activateSprintOpen}
               setOpen={setActivateSprintOpen}
               sprintId={selectedSprint.id}
-              userId={1}
+              userId={user.id}
             />
           )}
         </CardContent>

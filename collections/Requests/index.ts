@@ -1,7 +1,11 @@
 import type { CollectionConfig } from "payload";
+import { afterRequestChange } from "./hooks/after-change";
 
 export const Requests: CollectionConfig = {
   slug: "requests",
+  hooks: {
+    afterChange: [afterRequestChange],
+  },
   fields: [
     {
       name: "requestBy",

@@ -3,8 +3,10 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { z } from "zod";
-import { Pod } from "@/payload-types";
+import { Pod, User } from "@/payload-types";
 import { generateRandomPassword } from "@/lib/random-password-generator";
+import { cookies, headers } from "next/headers";
+import { sanitizeResponse } from "@/lib/utils";
 
 const createMemberSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
@@ -84,6 +86,70 @@ export async function awardPoints(userId: number, points: number) {
   });
 
   return { member: updatedMember, status: "success" };
+}
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .email({ message: "Email expected." })
+    .min(1, { message: "Email is required. " }),
+  password: z.string().min(1, { message: "Message is required." }),
+});
+
+export async function login({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  const payload = await getPayload({ config });
+
+  if (!email || !password) {
+    return {
+      status: "error",
+      errors: {
+        email: ["Email is required."],
+        password: ["Password is required."],
+      },
+    };
+  }
+
+  const user = await payload.login({
+    collection: "users",
+    data: {
+      email,
+      password,
+    },
+  });
+
+  // Set the cookie manually using Next.js cookies API
+  const cookieStore = await cookies();
+  if (user.token)
+    cookieStore.set(`payload-token`, user.token, {
+      httpOnly: true, // Secure the cookie
+      secure: process.env.NODE_ENV === "production", // Only secure in production
+      path: "/", // Accessible across the app
+      maxAge: 7200, // Match Payload's default expiration (2 hours in seconds)
+    });
+
+  return {
+    success: true,
+    message: "Logged in successfully",
+    user: user.user,
+  };
+
+  return { user };
+}
+
+export async function getUser() {
+  const payload = await getPayload({ config });
+
+  const heads = await headers();
+
+  const member = await payload.auth({ headers: heads });
+
+  return { member: sanitizeResponse<User>(member.user), status: "success" };
 }
 
 export async function getAllMembers() {

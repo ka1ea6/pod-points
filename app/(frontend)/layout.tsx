@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../../styles/globals.scss";
 import { Toaster } from "sonner";
+import Providers from "@/providers";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -16,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>

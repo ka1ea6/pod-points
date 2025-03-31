@@ -32,6 +32,7 @@ import { Task } from "@/payload-types";
 import AddTaskDialog from "./add-task";
 import DeleteTaskDialog from "./delete-task";
 import EditTaskDialog from "./edit-task";
+import { useAuth } from "@/providers/auth";
 
 const TasksTab = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -39,6 +40,7 @@ const TasksTab = () => {
   const [editTaskOpen, setEditTaskOpen] = useState(false);
   const [deleteTaskOpen, setDeleteTaskOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const { user } = useAuth();
 
   const fetchTasks = useCallback(async () => {
     const { docs: tasks } = await getAllTasks();
@@ -124,20 +126,20 @@ const TasksTab = () => {
               ))}
             </TableBody>
           </Table>
-          {editTaskOpen && selectedTask && (
+          {editTaskOpen && selectedTask && user && (
             <EditTaskDialog
               open={editTaskOpen}
               setOpen={setEditTaskOpen}
               task={selectedTask}
-              userId={1}
+              userId={user.id}
             />
           )}
-          {deleteTaskOpen && selectedTask && (
+          {deleteTaskOpen && selectedTask && user && (
             <DeleteTaskDialog
               open={deleteTaskOpen}
               setOpen={setDeleteTaskOpen}
               taskId={selectedTask.id}
-              userId={1}
+              userId={user.id}
             />
           )}
           {tasks.length === 0 && (

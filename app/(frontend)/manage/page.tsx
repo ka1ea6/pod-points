@@ -3,8 +3,8 @@ import { DashboardHeader } from "@/components/dashboard-header";
 import { getCurrentUser } from "@/lib/auth";
 import { AdminDashboard } from "@/components/admin-dashboard";
 
-export default function AdminPage() {
-  const user = getCurrentUser();
+export default async function AdminPage() {
+  const user = await getCurrentUser();
 
   if (!user || user.role !== "admin") {
     redirect("/");

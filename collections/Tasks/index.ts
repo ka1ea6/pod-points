@@ -1,9 +1,13 @@
 import type { CollectionConfig } from "payload";
+import { afterTaskChange } from "./hooks/after-change";
 
 export const Tasks: CollectionConfig = {
   slug: "tasks",
   admin: {
     useAsTitle: "title",
+  },
+  hooks: {
+    afterChange: [afterTaskChange],
   },
   fields: [
     {

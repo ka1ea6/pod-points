@@ -26,10 +26,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, LinkIcon } from "lucide-react";
+import { Plus, LinkIcon, User } from "lucide-react";
 import { getAllTasks } from "@/actions/tasks";
 import { Task } from "@/payload-types";
 import RequestPointsDialog from "./request-points-dialog";
+import { useSocket } from "@/providers/socket";
+import { useAuth } from "@/providers/auth";
 
 // type Task = {
 //   id: string;
@@ -69,6 +71,8 @@ export function TaskBoard() {
     evidence: "",
   });
 
+  const { user } = useAuth();
+
   const fetchTasks = useCallback(async () => {
     const res = await getAllTasks();
     setTasks(() => {
@@ -84,6 +88,18 @@ export function TaskBoard() {
       );
     });
   }, []);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("tasks", (args) => {
+      console.log("args", args);
+    });
+
+    return () => {
+      socket?.off("tasks");
+    };
+  }, [socket]);
 
   useEffect(() => {
     fetchTasks();
@@ -193,11 +209,13 @@ export function TaskBoard() {
             <Plus className="mr-2 h-4 w-4" />
             Request Points
           </Button>
-          <RequestPointsDialog
-            open={isRequestModalOpen}
-            setOpen={setIsRequestModalOpen}
-            userId={1}
-          />
+          {user && (
+            <RequestPointsDialog
+              open={isRequestModalOpen}
+              setOpen={setIsRequestModalOpen}
+              userId={user.id}
+            />
+          )}
         </div>
       </CardHeader>
       <CardContent>

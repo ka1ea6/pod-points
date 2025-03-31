@@ -134,8 +134,10 @@ export interface UserAuthOperations {
 export interface Activity {
   id: number;
   user: number | User;
-  action?: ('got-assigned' | 'completed' | 'approved' | 'rejected') | null;
-  task: number | Task;
+  action?: ('got-assigned' | 'completed' | 'approved' | 'rejected' | 'requested') | null;
+  title?: string | null;
+  description?: string | null;
+  points?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -177,38 +179,6 @@ export interface Pod {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tasks".
- */
-export interface Task {
-  id: number;
-  title: string;
-  description?: string | null;
-  link?: string | null;
-  points: number;
-  status: 'available' | 'in-progress' | 'completed' | 'approved';
-  assignee?: (number | null) | User;
-  assignedBy?: (number | null) | User;
-  isRecurring?: boolean | null;
-  sprint?: (number | null) | Sprint;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sprints".
- */
-export interface Sprint {
-  id: number;
-  title: string;
-  description?: string | null;
-  isActive?: boolean | null;
-  startDate: string;
-  deadline: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "activityComments".
  */
 export interface ActivityComment {
@@ -242,6 +212,38 @@ export interface Notification {
   addressedTo: number | User;
   seen?: boolean | null;
   link?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sprints".
+ */
+export interface Sprint {
+  id: number;
+  title: string;
+  description?: string | null;
+  isActive?: boolean | null;
+  startDate: string;
+  deadline: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tasks".
+ */
+export interface Task {
+  id: number;
+  title: string;
+  description?: string | null;
+  link?: string | null;
+  points: number;
+  status: 'available' | 'in-progress' | 'completed' | 'approved';
+  assignee?: (number | null) | User;
+  assignedBy?: (number | null) | User;
+  isRecurring?: boolean | null;
+  sprint?: (number | null) | Sprint;
   updatedAt: string;
   createdAt: string;
 }
@@ -353,7 +355,9 @@ export interface PayloadMigration {
 export interface ActivitiesSelect<T extends boolean = true> {
   user?: T;
   action?: T;
-  task?: T;
+  title?: T;
+  description?: T;
+  points?: T;
   updatedAt?: T;
   createdAt?: T;
 }

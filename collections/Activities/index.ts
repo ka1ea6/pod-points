@@ -17,14 +17,21 @@ export const Activities: CollectionConfig = {
         { label: "Completed", value: "completed" },
         { label: "Approved", value: "approved" },
         { label: "Rejected", value: "rejected" },
+        { label: "Requested", value: "requested" },
       ],
       required: false,
     },
     {
-      name: "task",
-      type: "relationship",
-      relationTo: "tasks",
-      required: true,
+      name: "title",
+      type: "text",
+    },
+    {
+      name: "description",
+      type: "text",
+    },
+    {
+      name: "points",
+      type: "number",
     },
   ],
 };

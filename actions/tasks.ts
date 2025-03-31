@@ -40,7 +40,7 @@ export async function createTask(prevState: any, formData: FormData) {
       data: {
         ...data,
         assignee: assignedUser,
-        status: "available",
+        status: assignedUser ? "in-progress" : "available",
       },
     });
     return { status: "success", task: newTask };

@@ -28,22 +28,22 @@ import {
 import { Pod, Task, User } from "@/payload-types";
 import { getAllMembers } from "@/actions/users";
 import { createTask, updateTask } from "@/actions/tasks";
+import { useAuth } from "@/providers/auth";
 
 interface EditTaskDialogProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   task: Task;
-  userId: number;
 }
 
 const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
   open,
   setOpen,
   task,
-  userId,
 }) => {
   const [state, formAction] = useActionState(updateTask, {} as any);
   const [members, setMembers] = useState<User[]>([]);
+  const { user } = useAuth();
 
   const fetchMembers = useCallback(async () => {
     const { members } = await getAllMembers();
@@ -68,7 +68,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
           <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
         <form action={formAction}>
-          <input type="hidden" name="userId" value={1} />
+          <input type="hidden" name="userId" value={user?.id} />
           <input type="hidden" name="taskId" value={task.id} />
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">

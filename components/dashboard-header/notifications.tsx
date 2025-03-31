@@ -52,22 +52,20 @@ const Notifications = () => {
             <ul className="flex flex-col border max-h-[200px] overflow-y-scroll hide-scrollbar">
               {notifications.map((notification) => {
                 return (
-                  <>
-                    <li
-                      key={notification.id}
-                      className="border-b border-slate-100 px-4 py-3 hover:bg-slate-50 flex justify-between items-center"
-                    >
-                      <div className="flex flex-col">
-                        <span className="font-bold capitalize">
-                          {notification.description}
-                        </span>
-                        <span className="text-xs text-slate-400">
-                          {formatDate(new Date(notification.createdAt))}
-                        </span>
-                      </div>
-                      <div className="h-2 w-2 bg-red-500 rounded-full"></div>
-                    </li>
-                  </>
+                  <li
+                    key={notification.id}
+                    className="border-b border-slate-100 px-4 py-3 hover:bg-slate-50 flex justify-between items-center"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-bold capitalize">
+                        {notification.description}
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        {formatDate(new Date(notification.createdAt))}
+                      </span>
+                    </div>
+                    <div className="h-2 w-2 bg-red-500 rounded-full"></div>
+                  </li>
                 );
               })}
             </ul>
