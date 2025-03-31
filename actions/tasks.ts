@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@/payload.config";
 import { Task, User } from "@/payload-types";
 import { z } from "zod";
+import { getId } from "@/lib/utils";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
@@ -67,6 +68,21 @@ export async function getAllTasks() {
   return tasks;
 }
 
+export async function getRecurringTasks() {
+  const payload = await getPayload({ config });
+
+  const tasks = await payload.find({
+    collection: "tasks",
+    where: {
+      isRecurring: {
+        equals: true,
+      },
+    },
+  });
+
+  return { status: "success", tasks };
+}
+
 export async function getTasksByStatus(status: Task["status"]) {
   const payload = await getPayload({ config });
 
@@ -126,6 +142,158 @@ export async function updateTask(prevState: any, formData: FormData) {
   });
 
   return { status: "success", task: updatedTask };
+}
+
+export async function claimTask(taskId: number, userId: number) {
+  const payload = await getPayload({ config });
+
+  const task = await payload.findByID({
+    collection: "tasks",
+    id: taskId,
+  });
+
+  if (!task) return { status: "error", message: "Task not found" };
+  if (task.status !== "available")
+    return { status: "error", message: "Task not available for claiming." };
+
+  const user = await payload.findByID({
+    collection: "users",
+    id: userId,
+  });
+
+  if (!user) return { status: "error", message: "User not found" };
+  const claimedTask = await payload.update({
+    collection: "tasks",
+    where: {
+      id: {
+        equals: task.id,
+      },
+    },
+    data: {
+      status: "in-progress",
+      assignee: user,
+      assignedBy: user,
+    },
+  });
+
+  return claimedTask;
+}
+
+export async function completeTask(taskId: number, userId: number) {
+  const payload = await getPayload({ config });
+
+  const task = await payload.findByID({
+    collection: "tasks",
+    id: taskId,
+  });
+
+  if (!task) return { status: "error", message: "Task not found" };
+  if (task.status !== "in-progress" || !task.assignee)
+    return { status: "error", message: "Task can't be completed." };
+
+  const user = await payload.findByID({
+    collection: "users",
+    id: userId,
+  });
+
+  if (!user) return { status: "error", message: "User not found" };
+
+  const assigneeId = getId(task.assignee);
+
+  if (assigneeId.toString() !== user.id.toString())
+    return {
+      status: "error",
+      message: "You're not assigned to you. You can't complete it.",
+    };
+
+  const completedTask = await payload.update({
+    collection: "tasks",
+    where: {
+      id: {
+        equals: task.id,
+      },
+    },
+    data: {
+      status: "completed",
+      assignee: user,
+    },
+  });
+
+  return completedTask;
+}
+
+export async function submitTaskForApproval(
+  taskId: number,
+  userId: number,
+  evidence: string,
+  description?: string
+) {
+  const payload = await getPayload({ config });
+
+  const task = await payload.findByID({
+    collection: "tasks",
+    id: taskId,
+  });
+
+  if (!task) return { status: "error", message: "Task not found" };
+  if (!task.isRecurring && (task.status !== "completed" || !task.assignee))
+    return { status: "error", message: "Task can't be approved." };
+
+  const user = await payload.findByID({
+    collection: "users",
+    id: userId,
+  });
+
+  if (!user) return { status: "error", message: "User not found" };
+
+  const assigneeId = getId(user);
+
+  if (!task.isRecurring && assigneeId.toString() !== user.id.toString())
+    return {
+      status: "error",
+      message: "You're not assigned to you. You can't submit it for approval.",
+    };
+
+  const request = await payload.create({
+    collection: "requests",
+    data: {
+      task: task,
+      requestBy: user,
+      status: "requested",
+      title: task.title,
+      description: description,
+      points: task.points,
+      evidence: evidence,
+    },
+  });
+
+  if (task.isRecurring) {
+    const createdTask = await payload.create({
+      collection: "tasks",
+      data: {
+        ...task,
+        assignee: user,
+        status: "pending-approval",
+        isRecurring: false,
+      },
+    });
+
+    return { status: "success", task: createdTask };
+  } else {
+    const pendingTask = await payload.update({
+      collection: "tasks",
+      where: {
+        id: {
+          equals: task.id,
+        },
+      },
+      data: {
+        status: "pending-approval",
+        assignee: user,
+      },
+    });
+    return { task: pendingTask, request: request };
+  }
 }
 
 export async function removeTask(taskId: number, userId: number) {

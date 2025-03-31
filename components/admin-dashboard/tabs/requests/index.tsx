@@ -16,14 +16,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, User, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { changeRequestStatus, getPendingRequests } from "@/actions/requests";
 import { Request } from "@/payload-types";
 import { toast } from "sonner";
+import { useAuth } from "@/providers/auth";
 
 const RequestsTab = () => {
   const [pendingRequests, setPendingRequests] = useState<Request[]>([]);
+  const { user } = useAuth();
 
   const fetchPendingRequests = useCallback(async () => {
     const res = await getPendingRequests();
@@ -35,7 +37,12 @@ const RequestsTab = () => {
   }, []);
 
   const handleApprove = useCallback(async (id: number) => {
-    const { request, status } = await changeRequestStatus(id, 1, "approved");
+    if (!user) return;
+    const { request, status } = await changeRequestStatus(
+      id,
+      user.id,
+      "approved"
+    );
     if (status === "success") {
       toast.success(
         `Request by ${request.requestBy.name} for task ${request.title} has been approved`

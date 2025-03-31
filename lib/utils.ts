@@ -11,3 +11,12 @@ export function sanitizeResponse<T>(res: Object | null) {
     Object.entries(res).filter(([key]) => !key.startsWith("_"))
   ) as T;
 }
+
+export function getId(
+  item: number | { id: number },
+  returnAs: "number" | "string" = "string"
+) {
+  const id = typeof item === "number" ? item : item.id;
+
+  return returnAs === "number" ? id : id.toString();
+}

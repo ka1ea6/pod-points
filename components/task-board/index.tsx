@@ -27,11 +27,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, LinkIcon, User } from "lucide-react";
-import { getAllTasks } from "@/actions/tasks";
+import {
+  claimTask,
+  completeTask,
+  getAllTasks,
+  submitTaskForApproval,
+} from "@/actions/tasks";
 import { Task } from "@/payload-types";
 import RequestPointsDialog from "./request-points-dialog";
 import { useSocket } from "@/providers/socket";
 import { useAuth } from "@/providers/auth";
+import { toast } from "sonner";
 
 // type Task = {
 //   id: string;
@@ -58,12 +64,15 @@ export function TaskBoard() {
     available: [],
     "in-progress": [],
     completed: [],
+    "pending-approval": [],
     approved: [],
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [approvalEvidence, setApprovalEvidence] = useState("");
+  const [approvalDescription, setApprovalDescription] = useState("");
   const [pointRequest, setPointRequest] = useState<PointRequest>({
     taskTitle: "",
     points: 0,
@@ -139,6 +148,7 @@ export function TaskBoard() {
         | "available"
         | "in-progress"
         | "completed"
+        | "pending-approval"
         | "approved",
       // Add assignee if moving to in-progress and doesn't have one
       assignee:
@@ -182,6 +192,7 @@ export function TaskBoard() {
     { id: "available", title: "Available Tasks" },
     { id: "in-progress", title: "In Progress" },
     { id: "completed", title: "Completed" },
+    { id: "pending-approval", title: "Pending approval" },
     { id: "approved", title: "Approved" },
   ];
 
@@ -190,6 +201,40 @@ export function TaskBoard() {
       status,
       taskList.filter((task) => !task.isRecurring),
     ])
+  );
+
+  const onClaimTask = useCallback(
+    async (taskId: number) => {
+      if (!user) return;
+      const task = await claimTask(taskId, user.id);
+      toast.success(`Task claimed successfully.`);
+      setIsDialogOpen(false);
+    },
+    [user]
+  );
+  const onCompleteTask = useCallback(
+    async (taskId: number) => {
+      if (!user) return;
+      const task = await completeTask(taskId, user.id);
+      toast.success(`Task completed successfully.`);
+      setIsDialogOpen(false);
+    },
+    [user]
+  );
+
+  const onRequestApproval = useCallback(
+    async (taskId: number) => {
+      if (!user) return;
+      const task = await submitTaskForApproval(
+        taskId,
+        user.id,
+        approvalEvidence,
+        approvalDescription
+      );
+      toast.success(`Task submitted for approval.`);
+      setIsDialogOpen(false);
+    },
+    [user, approvalEvidence, approvalDescription]
   );
 
   return (
@@ -220,7 +265,7 @@ export function TaskBoard() {
       </CardHeader>
       <CardContent>
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
             {columns.map((column) => (
               <div key={column.id} className="space-y-4">
                 <div className="font-medium">{column.title}</div>
@@ -328,6 +373,10 @@ export function TaskBoard() {
                     <Input
                       id="evidence"
                       placeholder="Link to evidence or description"
+                      value={approvalEvidence}
+                      onChange={(e) =>
+                        setApprovalEvidence(e.currentTarget.value)
+                      }
                     />
                     <Button size="icon" variant="outline">
                       <LinkIcon className="h-4 w-4" />
@@ -336,19 +385,41 @@ export function TaskBoard() {
                   <Textarea
                     placeholder="Additional comments or context"
                     className="mt-2"
+                    value={approvalDescription}
+                    onChange={(e) =>
+                      setApprovalDescription(e.currentTarget.value)
+                    }
                   />
                 </div>
               )}
             </div>
             <DialogFooter>
-              {selectedTask?.status === "available" && (
-                <Button>Claim Task</Button>
+              {selectedTask?.status === "available" && user && (
+                <Button
+                  onClick={() => {
+                    onClaimTask(selectedTask.id);
+                  }}
+                >
+                  Claim Task
+                </Button>
               )}
               {selectedTask?.status === "in-progress" && (
-                <Button>Mark as Completed</Button>
+                <Button
+                  onClick={() => {
+                    onCompleteTask(selectedTask.id);
+                  }}
+                >
+                  Mark as Completed
+                </Button>
               )}
               {selectedTask?.status === "completed" && (
-                <Button>Submit for Approval</Button>
+                <Button
+                  onClick={() => {
+                    onRequestApproval(selectedTask.id);
+                  }}
+                >
+                  Submit for Approval
+                </Button>
               )}
             </DialogFooter>
           </DialogContent>

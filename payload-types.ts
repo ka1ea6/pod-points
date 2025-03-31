@@ -239,7 +239,7 @@ export interface Task {
   description?: string | null;
   link?: string | null;
   points: number;
-  status: 'available' | 'in-progress' | 'completed' | 'approved';
+  status?: ('available' | 'in-progress' | 'completed' | 'pending-approval' | 'approved') | null;
   assignee?: (number | null) | User;
   assignedBy?: (number | null) | User;
   isRecurring?: boolean | null;
@@ -256,6 +256,7 @@ export interface Request {
   requestBy: number | User;
   actionBy?: (number | null) | User;
   status: 'requested' | 'approved' | 'rejected';
+  task?: (number | null) | Task;
   title: string;
   points: number;
   evidence: string;
@@ -464,6 +465,7 @@ export interface RequestsSelect<T extends boolean = true> {
   requestBy?: T;
   actionBy?: T;
   status?: T;
+  task?: T;
   title?: T;
   points?: T;
   evidence?: T;

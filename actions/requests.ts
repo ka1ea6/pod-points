@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { z } from "zod";
 import { Request } from "@/payload-types";
+import { getId } from "@/lib/utils";
 
 const createRequestSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
@@ -34,24 +35,27 @@ export async function createRequest(prevState: any, formData: FormData) {
       id: data.requestBy,
     });
 
+    const task = await payload.create({
+      collection: "tasks",
+      data: {
+        ...data,
+        isRecurring: false,
+        status: "pending-approval",
+      },
+    });
     const request = await payload.create({
       collection: "requests",
       data: {
         ...data,
         status: "requested",
         requestBy: requestBy,
+        task,
       },
     });
+
     return { status: "success", request };
   } catch (err) {
     console.error("err", err);
-    if ((err as any).rawCode === 2067) {
-      return {
-        errors: {
-          color: ["Color must be unique"],
-        },
-      };
-    }
   }
 }
 
@@ -70,6 +74,21 @@ export async function changeRequestStatus(
       actionBy: userId,
     },
   });
+
+  console.log("request", request);
+
+  if (request.task) {
+    const taskId = getId(request.task);
+    const task = await payload.update({
+      collection: "tasks",
+      id: taskId,
+      data: {
+        status: "approved",
+      },
+    });
+
+    return { request, task, status: "success" };
+  }
 
   return { request, status: "success" };
 }

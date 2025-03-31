@@ -31,6 +31,11 @@ export const Requests: CollectionConfig = {
       required: true,
     },
     {
+      name: "task",
+      type: "relationship",
+      relationTo: "tasks",
+    },
+    {
       name: "title",
       type: "text",
       required: true,

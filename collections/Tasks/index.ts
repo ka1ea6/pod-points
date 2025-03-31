@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { afterTaskChange } from "./hooks/after-change";
+import { Task } from "@/payload-types";
 
 export const Tasks: CollectionConfig = {
   slug: "tasks",
@@ -38,20 +39,30 @@ export const Tasks: CollectionConfig = {
         { label: "To Do", value: "available" },
         { label: "In Progress", value: "in-progress" },
         { label: "Completed", value: "completed" },
+        { label: "Pending approval", value: "pending-approval" },
         { label: "Approved", value: "approved" },
       ],
       defaultValue: "available",
       required: true,
+      admin: {
+        condition: (_, siblingData: any) => !siblingData.isRecurring,
+      },
     },
     {
       name: "assignee",
       type: "relationship",
       relationTo: "users",
+      admin: {
+        condition: (_, siblingData: any) => !siblingData.isRecurring,
+      },
     },
     {
       name: "assignedBy",
       type: "relationship",
       relationTo: "users",
+      admin: {
+        condition: (_, siblingData: any) => !siblingData.isRecurring,
+      },
     },
     {
       name: "isRecurring",
