@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useEffect, useState } from "react";
+import { use, useActionState, useCallback, useEffect, useState } from "react";
 import { add, formatDistanceToNow } from "date-fns";
 import { Dot, Heart, MessageSquare, ThumbsUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,10 +18,13 @@ import { getAllUserActivities } from "@/actions/activities";
 import { ActivityWithReactionAndCommentCount } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { addActivityReaction } from "@/actions/activityReactions";
-import { getActivityComments } from "@/actions/activityComments";
+import { addComment, getActivityComments } from "@/actions/activityComments";
 import { formatDate } from "@/lib/formatters";
+import { Input } from "./ui/input";
+import { toast } from "sonner";
 
 export function PointsActivity() {
+  const [state, formAction] = useActionState(addComment, {} as any);
   const [activities, setActivities] = useState<
     ActivityWithReactionAndCommentCount[]
   >([]);
@@ -49,8 +52,10 @@ export function PointsActivity() {
   }, []);
 
   useEffect(() => {
-    console.log("comments", comments);
-  }, [comments]);
+    if (state && state.status === "success") {
+      toast.success("Comment added");
+    }
+  }, [state]);
 
   const addReaction = useCallback(
     async (activityId: number, reaction: ActivityReaction["reaction"]) => {
@@ -185,9 +190,8 @@ export function PointsActivity() {
                 {Object.keys(comments).includes(activity.id.toString()) && (
                   <ul className="flex flex-col gap-3">
                     {comments[activity.id].map((comment) => {
-                      console.log("comment", comment);
                       return (
-                        <li className="w-full min-h-10 ml-16 flex flex-col gap-1">
+                        <li className="w-[calc(100%-5rem)] text-justify min-h-10 ml-16 flex flex-col gap-1">
                           <div className="flex gap-2 items-center">
                             <Avatar className="h-4 w-4 border">
                               <AvatarImage
@@ -213,6 +217,25 @@ export function PointsActivity() {
                         </li>
                       );
                     })}
+                    <li className="w-[calc(100%-5rem)] ml-20">
+                      <form
+                        action={formAction}
+                        className="  flex flex-col gap-4"
+                      >
+                        <input
+                          type="hidden"
+                          name="activityId"
+                          value={activity.id}
+                        />
+                        <input type="hidden" name="userId" value={1} />
+                        <Input type="text" name="comment" />
+                        <div className="w-full flex justify-end">
+                          <Button variant={"default"} size={"sm"}>
+                            Add comment
+                          </Button>
+                        </div>
+                      </form>
+                    </li>
                   </ul>
                 )}
               </div>
