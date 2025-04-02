@@ -50,6 +50,14 @@ export function PointsActivity() {
           else copy[activityId] = [args.doc];
           return copy;
         });
+        setActivities((act) => {
+          const actId = getId(args.doc.activity, "string");
+          return act.map((el) =>
+            el.id.toString() === actId
+              ? { ...el, commentCount: el.commentCount + 1 }
+              : el
+          );
+        });
       } else {
         setComments((prev) => {
           const copy = { ...prev };
@@ -178,7 +186,11 @@ export function PointsActivity() {
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-1 text-sm">
-                        <span className="font-medium">{user.name}</span>
+                        <span className="font-medium">
+                          {getId(currUser, "string") === getId(user, "string")
+                            ? "You"
+                            : user.name}
+                        </span>
                         <span className="text-muted-foreground">
                           {activity.action}
                         </span>
