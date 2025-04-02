@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { afterTaskChange } from "./hooks/after-change";
-import { Task } from "@/payload-types";
+import { beforeTaskChange } from "./hooks/before-change";
 
 export const Tasks: CollectionConfig = {
   slug: "tasks",
@@ -9,6 +9,7 @@ export const Tasks: CollectionConfig = {
   },
   hooks: {
     afterChange: [afterTaskChange],
+    beforeChange: [beforeTaskChange],
   },
   fields: [
     {
@@ -78,7 +79,6 @@ export const Tasks: CollectionConfig = {
       relationTo: "sprints",
       admin: {
         position: "sidebar",
-
         condition: (_, siblingData) => {
           return !siblingData.isRecurring;
         },

@@ -1,7 +1,11 @@
 import type { CollectionConfig } from "payload";
+import { afterActivityChange } from "./hooks/after-change";
 
 export const Activities: CollectionConfig = {
   slug: "activities",
+  hooks: {
+    afterChange: [afterActivityChange],
+  },
   fields: [
     {
       name: "user",

@@ -57,6 +57,62 @@ export async function getCurrentSprint() {
 
   return { sprint: null };
 }
+
+export async function getSprintStats() {
+  const payload = await getPayload({ config });
+
+  const { docs: pods } = await payload.find({
+    collection: "pods",
+  });
+
+  const { sprint: currSprint } = await getCurrentSprint();
+
+  if (!currSprint) return { status: "success", stats: [] };
+
+  const stats = await Promise.all(
+    pods.map(async (pod) => {
+      const { docs: users } = await payload.find({
+        collection: "users",
+        where: {
+          "pod.id": {
+            equals: pod.id,
+          },
+        },
+      });
+
+      const { docs: pods } = await payload.find({
+        collection: "tasks",
+        where: {
+          and: [
+            {
+              "assignee.id": {
+                in: users.map((el) => el.id),
+              },
+            },
+            {
+              "sprint.id": {
+                equals: currSprint.id,
+              },
+            },
+          ],
+        },
+      });
+
+      const points = pods.reduce((acc, curr) => {
+        return acc + curr.points;
+      }, 0);
+
+      return {
+        ...pod,
+        memberCount: users.length,
+        points,
+      };
+    })
+  );
+
+  return { status: "success", stats };
+}
+
 export async function getLastSprint() {
   const payload = await getPayload({ config });
 

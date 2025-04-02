@@ -3,24 +3,22 @@
 import type React from "react";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays } from "lucide-react";
 import { getAllPods } from "@/actions/pods";
-import { Pod, Sprint } from "@/payload-types";
-import { getCurrentSprint, getLastSprint } from "@/actions/sprints";
-import { PodWithCount, SocketArgs } from "@/lib/types";
+import { Sprint } from "@/payload-types";
+import {
+  getCurrentSprint,
+  getLastSprint,
+  getSprintStats,
+} from "@/actions/sprints";
+import { PodWithCount, SocketArgs, SprintStats } from "@/lib/types";
 import { useSocket } from "@/providers/socket";
 
 export function PodOverview() {
-  const [pods, setPods] = useState<PodWithCount[]>([]);
+  const [pods, setPods] = useState<SprintStats[]>([]);
   const [currentSprint, setCurrentSprint] = useState<Sprint | null>(null);
   const [lastSprint, setLastSprint] = useState<Sprint | null>(null);
   const { socket } = useSocket();
@@ -29,7 +27,7 @@ export function PodOverview() {
     socket?.on("pods", (args: SocketArgs<PodWithCount>) => {
       if (args.operation === "create") {
         setPods((prev) => {
-          return [...prev, { ...args.doc, memberCount: 0 }];
+          return [...prev, { ...args.doc, memberCount: 0, points: 0 }];
         });
       } else {
         setPods((prev) => {
@@ -43,15 +41,19 @@ export function PodOverview() {
     socket?.on("sprints", (args: SocketArgs<PodWithCount>) => {
       fetchCurrentSprint();
     });
+    socket?.on("point-updated", (args: SocketArgs<PodWithCount>) => {
+      fetchStats();
+    });
 
     return () => {
       socket?.off("pods");
+      socket?.off("sprints");
     };
   }, [socket]);
 
-  const fetchPods = useCallback(async () => {
-    const res = await getAllPods();
-    if (res.pods) setPods(res.pods);
+  const fetchStats = useCallback(async () => {
+    const { stats } = await getSprintStats();
+    if (stats) setPods(stats);
   }, []);
 
   const fetchLastSprint = useCallback(async () => {
@@ -66,7 +68,7 @@ export function PodOverview() {
   }, []);
 
   useEffect(() => {
-    fetchPods();
+    fetchStats();
     fetchCurrentSprint();
   }, []);
 

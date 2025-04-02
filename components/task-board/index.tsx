@@ -294,7 +294,7 @@ export function TaskBoard() {
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className="min-h-[200px] rounded-lg border bg-muted/40 p-2"
+                      className="min-h-[200px] rounded-lg border bg-muted/40 p-2 max-h-[500px] overflow-y-scroll hide-scrollbar"
                     >
                       {nonRecurringTasks[column.id]?.map((task, index) => (
                         <Draggable

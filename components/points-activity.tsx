@@ -15,14 +15,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ActivityComment, ActivityReaction, User } from "@/payload-types";
 import { getAllUserActivities } from "@/actions/activities";
-import { ActivityWithReactionAndCommentCount } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { ActivityWithReactionAndCommentCount, SocketArgs } from "@/lib/types";
+import { cn, getId } from "@/lib/utils";
 import { addActivityReaction } from "@/actions/activityReactions";
 import { addComment, getActivityComments } from "@/actions/activityComments";
 import { formatDate } from "@/lib/formatters";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/auth";
+import { useSocket } from "@/providers/socket";
 
 export function PointsActivity() {
   const [state, formAction] = useActionState(addComment, {} as any);
@@ -36,6 +37,35 @@ export function PointsActivity() {
   const [comments, setComments] = useState<Record<number, ActivityComment[]>>(
     {}
   );
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("activity-comments", (args: SocketArgs<ActivityComment>) => {
+      if (args.operation === "create") {
+        setComments((prev) => {
+          const copy = { ...prev };
+          const activityId = getId(args.doc.activity, "string") as number;
+
+          if (copy[activityId]) copy[activityId].push(args.doc);
+          else copy[activityId] = [args.doc];
+          return copy;
+        });
+      } else {
+        setComments((prev) => {
+          const copy = { ...prev };
+          const activityId = getId(args.doc.activity, "string") as number;
+          copy[activityId] = copy[activityId].map((el) =>
+            el.id === args.doc.id ? args.doc : el
+          );
+
+          return copy;
+        });
+      }
+    });
+    return () => {
+      socket?.off("activity-comments");
+    };
+  }, [socket]);
 
   const { user: currUser } = useAuth();
 

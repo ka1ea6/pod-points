@@ -1,6 +1,7 @@
 import { Activity, Pod, Sprint } from "@/payload-types";
 
 export type PodWithCount = Pod & { memberCount: number };
+export type SprintStats = PodWithCount & { points: number };
 export type SprintWithTaskCount = Sprint & { taskCount: number };
 export type ActivityWithReactionAndCommentCount = Activity & {
   reactions: {
