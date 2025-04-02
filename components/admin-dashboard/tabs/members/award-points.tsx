@@ -16,18 +16,20 @@ import { useAuth } from "@/providers/auth";
 interface AwardPointsDialogProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  userId: number;
 }
 
 const AwardPointsDialog: React.FC<AwardPointsDialogProps> = ({
   open,
   setOpen,
+  userId,
 }) => {
   const [points, setPoints] = useState(0);
   const { user } = useAuth();
 
   const giftPoint = useCallback(async () => {
     if (!user) return;
-    const res = await awardPoints(user?.id, points);
+    const res = await awardPoints(userId, points);
     if (res && res.status === "success") {
       setOpen(false);
       toast.success(`${res.member.name} has been awarded ${points} points`);

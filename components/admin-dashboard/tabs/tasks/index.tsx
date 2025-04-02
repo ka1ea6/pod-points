@@ -33,6 +33,8 @@ import AddTaskDialog from "./add-task";
 import DeleteTaskDialog from "./delete-task";
 import EditTaskDialog from "./edit-task";
 import { useAuth } from "@/providers/auth";
+import { useSocket } from "@/providers/socket";
+import { SocketArgs } from "@/lib/types";
 
 const TasksTab = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -41,6 +43,27 @@ const TasksTab = () => {
   const [deleteTaskOpen, setDeleteTaskOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { user } = useAuth();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("tasks", (args: SocketArgs<Task>) => {
+      if (args.operation === "create") {
+        setTasks((prev) => {
+          return [...prev, args.doc];
+        });
+      } else {
+        setTasks((prev) => {
+          return prev.map((el) => {
+            if (el.id === args.doc.id) return args.doc;
+            return el;
+          });
+        });
+      }
+    });
+    return () => {
+      socket?.off("tasks");
+    };
+  }, [socket]);
 
   const fetchTasks = useCallback(async () => {
     const { docs: tasks } = await getAllTasks();
@@ -55,6 +78,21 @@ const TasksTab = () => {
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  const getStatus = (value: Task["status"]) => {
+    switch (value) {
+      case "available":
+        return <Badge variant={"default"}>Available</Badge>;
+      case "in-progress":
+        return <Badge variant={"default"}>In progress</Badge>;
+      case "completed":
+        return <Badge variant={"default"}>Completed</Badge>;
+      case "pending-approval":
+        return <Badge variant={"default"}>Pending approval</Badge>;
+      case "approved":
+        return <Badge variant={"default"}>Approved</Badge>;
+    }
+  };
 
   return (
     <>
@@ -83,6 +121,7 @@ const TasksTab = () => {
                 <TableHead>Task Name</TableHead>
                 <TableHead>Points</TableHead>
                 <TableHead>Assigned to</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -96,7 +135,10 @@ const TasksTab = () => {
                     <Badge variant="outline">+{task.points}</Badge>
                   </TableCell>
                   <TableCell>
-                    <span>{task.assignee.name}</span>
+                    <span>{task.assignee?.name}</span>
+                  </TableCell>
+                  <TableCell>
+                    <span>{getStatus(task.status)}</span>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">

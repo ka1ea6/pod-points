@@ -21,6 +21,7 @@ import {
 } from "react";
 import { Chrome, Colorful } from "@uiw/react-color";
 import { toast } from "sonner";
+import { Pod } from "@/payload-types";
 
 interface AddPodDialogProps {
   open: boolean;

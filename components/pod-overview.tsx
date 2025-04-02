@@ -16,12 +16,38 @@ import { CalendarDays } from "lucide-react";
 import { getAllPods } from "@/actions/pods";
 import { Pod, Sprint } from "@/payload-types";
 import { getCurrentSprint, getLastSprint } from "@/actions/sprints";
-import { PodWithCount } from "@/lib/types";
+import { PodWithCount, SocketArgs } from "@/lib/types";
+import { useSocket } from "@/providers/socket";
 
 export function PodOverview() {
   const [pods, setPods] = useState<PodWithCount[]>([]);
   const [currentSprint, setCurrentSprint] = useState<Sprint | null>(null);
   const [lastSprint, setLastSprint] = useState<Sprint | null>(null);
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("pods", (args: SocketArgs<PodWithCount>) => {
+      if (args.operation === "create") {
+        setPods((prev) => {
+          return [...prev, { ...args.doc, memberCount: 0 }];
+        });
+      } else {
+        setPods((prev) => {
+          return prev.map((el) => {
+            if (el.id === args.doc.id) return args.doc;
+            return el;
+          });
+        });
+      }
+    });
+    socket?.on("sprints", (args: SocketArgs<PodWithCount>) => {
+      fetchCurrentSprint();
+    });
+
+    return () => {
+      socket?.off("pods");
+    };
+  }, [socket]);
 
   const fetchPods = useCallback(async () => {
     const res = await getAllPods();
@@ -58,7 +84,7 @@ export function PodOverview() {
   // const userPod = pods[0]; // Assuming user is in Red Pod
 
   return (
-    <Card>
+    <Card className="h-100 flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle>Pod Overview</CardTitle>

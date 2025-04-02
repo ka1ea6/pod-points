@@ -38,6 +38,7 @@ import RequestPointsDialog from "./request-points-dialog";
 import { useSocket } from "@/providers/socket";
 import { useAuth } from "@/providers/auth";
 import { toast } from "sonner";
+import { SocketArgs } from "@/lib/types";
 
 // type Task = {
 //   id: string;
@@ -82,29 +83,48 @@ export function TaskBoard() {
 
   const { user } = useAuth();
 
+  const reduceTasksToCols = useCallback((tasks: Task[]) => {
+    return tasks.reduce(
+      (acc, curr) => {
+        const currStatus = curr.status || "available";
+        if (!Object.keys(acc).includes(currStatus)) acc[currStatus] = [curr];
+        else acc[currStatus].push(curr);
+
+        return acc;
+      },
+      {} as Record<string, Task[]>
+    );
+  }, []);
+
   const fetchTasks = useCallback(async () => {
     const res = await getAllTasks();
     setTasks(() => {
-      return res.docs.reduce(
-        (acc, curr) => {
-          if (!Object.keys(acc).includes(curr.status))
-            acc[curr.status] = [curr];
-          else acc[curr.status].push(curr);
-
-          return acc;
-        },
-        {} as Record<string, Task[]>
-      );
+      return reduceTasksToCols(res.docs);
     });
   }, []);
 
   const { socket } = useSocket();
 
   useEffect(() => {
-    socket?.on("tasks", (args) => {
-      console.log("args", args);
-    });
+    socket?.on("tasks", (args: SocketArgs<Task>) => {
+      if (args.doc.isRecurring) return;
 
+      setTasks((prev) => {
+        const copy = { ...prev };
+        if (!args.doc.status) return copy;
+        if (args.operation === "create") {
+          if (copy[args.doc.status]) copy[args.doc.status].push(args.doc);
+          else copy[args.doc.status] = [args.doc];
+        } else {
+          const items = Object.values(copy)
+            .flat()
+            .map((el) => (el.id === args.doc.id ? args.doc : el));
+
+          return reduceTasksToCols(items);
+        }
+        return copy;
+      });
+    });
     return () => {
       socket?.off("tasks");
     };
@@ -278,6 +298,7 @@ export function TaskBoard() {
                     >
                       {nonRecurringTasks[column.id]?.map((task, index) => (
                         <Draggable
+                          isDragDisabled
                           key={task.id}
                           draggableId={task.id.toString()}
                           index={index}

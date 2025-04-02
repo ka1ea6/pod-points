@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -32,13 +32,54 @@ import { Pod, User } from "@/payload-types";
 import AddMemberDialog from "./add-member";
 import { toast } from "sonner";
 import AwardPointsDialog from "./award-points";
+import { useSocket } from "@/providers/socket";
+import { SocketArgs } from "@/lib/types";
 
 const MembersTab = () => {
   const [members, setMembers] = useState<User[]>([]);
   const [pods, setPods] = useState<Pod[]>([]);
+  const [podValues, setPodValues] = useState<Record<string, string>>({});
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [awardMemberOpen, setAwardMemberOpen] = useState(false);
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+  // const podSelectRef = useRef<HTMLSelectElement>(null);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("users", (args: SocketArgs<User>) => {
+      if (args.operation === "create") {
+        setMembers((prev) => {
+          return [...prev, args.doc];
+        });
+      } else {
+        setMembers((prev) => {
+          return prev.map((el) => {
+            if (el.id === args.doc.id) return args.doc;
+            return el;
+          });
+        });
+      }
+    });
+    return () => {
+      socket?.off("users");
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    setPodValues((_) => {
+      return members.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.id.toString()]:
+            typeof curr.pod === "number"
+              ? curr.pod.toString()
+              : curr.pod?.id.toString(),
+        }),
+        {}
+      );
+    });
+  }, [members]);
 
   const fetchMembers = useCallback(async () => {
     const { members } = await getAllMembers();
@@ -104,7 +145,11 @@ const MembersTab = () => {
                     }
                     onValueChange={(value) => {
                       handlePodChange(member.id, parseInt(value));
+                      setPodValues((prev) => {
+                        return { ...prev, [member.id]: value };
+                      });
                     }}
+                    value={podValues[member.id]}
                   >
                     <SelectTrigger className="w-[140px]">
                       <SelectValue placeholder="Select pod" />

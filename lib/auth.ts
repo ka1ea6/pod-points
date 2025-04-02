@@ -1,13 +1,35 @@
-import { cookies } from "next/headers";
+"use server";
 
-// This is a mock implementation - in a real app, you would use NextAuth.js or similar
-export function getCurrentUser() {
-  // Mock user data - synchronous version
-  return {
-    id: "1",
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    image: "/placeholder.svg?height=32&width=32",
-    role: "admin", // or "user"
-  };
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import { User } from "@/payload-types";
+import { getPayload } from "payload";
+import config from "@payload-config";
+
+type Token = {
+  id: number;
+  collection: string;
+  email: string;
+  iat: number;
+  exp: number;
+};
+
+export async function getCurrentUser(): Promise<null | User> {
+  const cook = await cookies();
+  const token = cook.get("payload-token");
+
+  if (!token?.value) return null;
+
+  const res = jwt.decode(token?.value) as Token;
+
+  if (!res || !res.id) return null;
+
+  const payload = await getPayload({ config });
+
+  const user = await payload.findByID({
+    collection: "users",
+    id: res.id,
+  });
+
+  return user;
 }

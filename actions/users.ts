@@ -88,14 +88,6 @@ export async function awardPoints(userId: number, points: number) {
   return { member: updatedMember, status: "success" };
 }
 
-const loginSchema = z.object({
-  email: z
-    .string()
-    .email({ message: "Email expected." })
-    .min(1, { message: "Email is required. " }),
-  password: z.string().min(1, { message: "Message is required." }),
-});
-
 export async function login({
   email,
   password,

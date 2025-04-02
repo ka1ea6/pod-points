@@ -38,7 +38,7 @@ const RequestPointsDialog: React.FC<RequestPointsDialogProps> = ({
 
   useEffect(() => {
     if (state && state.status === "success") {
-      // setOpen(false);
+      setOpen(false);
       toast.success("Point request sent", {
         description: "Your request has been successfully sent.",
       });

@@ -1,4 +1,5 @@
 import { getId } from "@/lib/utils";
+import { websocket } from "@/services";
 import { CollectionAfterChangeHook } from "payload";
 
 export const afterRequestChange: CollectionAfterChangeHook = async ({
@@ -6,7 +7,14 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
   doc,
   req,
 }) => {
-  const res = await req.payload.create({
+  const socket = websocket.getIO();
+
+  socket?.emit("request", {
+    doc,
+    operation,
+  });
+
+  await req.payload.create({
     collection: "activities",
     data: {
       user: doc.requestBy,
@@ -17,6 +25,30 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
     },
   });
 
+  if (doc.status === "requested" && operation === "create") {
+    const leads = await req.payload.find({
+      collection: "users",
+      where: {
+        role: {
+          equals: "lead",
+        },
+      },
+    });
+
+    await Promise.all(
+      leads.docs.map(async (lead) => {
+        await req.payload.create({
+          collection: "notifications",
+          data: {
+            addressedTo: lead,
+            title: "Request for approval",
+            description: `${doc.requestBy.name} Requested approval for ${doc.title}`,
+          },
+        });
+      })
+    );
+  }
+
   if (doc.status === "approved" && doc.task) {
     const taskId = getId(doc.task);
     const task = await req.payload.update({
@@ -26,5 +58,25 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
         status: "approved",
       },
     });
+
+    if (task.assignedBy) {
+      await req.payload.create({
+        collection: "notifications",
+        data: {
+          addressedTo: task.assignedBy,
+          title: "Request approval",
+          description: `${req.user?.name} approved request ${doc.title}`,
+        },
+      });
+    } else if (task.assignee) {
+      await req.payload.create({
+        collection: "notifications",
+        data: {
+          addressedTo: task.assignee,
+          title: "Request approval",
+          description: `${req.user?.name} approved request ${doc.title}`,
+        },
+      });
+    }
   }
 };

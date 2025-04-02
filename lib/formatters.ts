@@ -4,7 +4,7 @@ export type TimeDurationType = "MIN" | "HOUR" | "DAY" | "WEEK";
 
 export const dateDisplay = (
   date: Date,
-  resolution: TimeDurationType,
+  resolution?: TimeDurationType,
   options: Intl.DateTimeFormatOptions = {
     day: "2-digit",
     month: "long",

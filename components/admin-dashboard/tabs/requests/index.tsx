@@ -22,10 +22,33 @@ import { changeRequestStatus, getPendingRequests } from "@/actions/requests";
 import { Request } from "@/payload-types";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/auth";
+import { useSocket } from "@/providers/socket";
+import { SocketArgs } from "@/lib/types";
 
 const RequestsTab = () => {
   const [pendingRequests, setPendingRequests] = useState<Request[]>([]);
   const { user } = useAuth();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("request", (args: SocketArgs<Request>) => {
+      if (args.operation === "create") {
+        setPendingRequests((prev) => {
+          return [...prev, args.doc];
+        });
+      } else {
+        setPendingRequests((prev) => {
+          return prev.map((el) => {
+            if (el.id === args.doc.id) return args.doc;
+            return el;
+          });
+        });
+      }
+    });
+    return () => {
+      socket?.off("request");
+    };
+  }, [socket]);
 
   const fetchPendingRequests = useCallback(async () => {
     const res = await getPendingRequests();
@@ -63,6 +86,10 @@ const RequestsTab = () => {
     // In a real app, you would also notify the user
   }, []);
 
+  const filteredRequests = pendingRequests.filter(
+    (el) => el.status === "requested"
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -72,7 +99,7 @@ const RequestsTab = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {pendingRequests.length === 0 ? (
+        {filteredRequests.length === 0 ? (
           <div className="flex h-[200px] items-center justify-center rounded-md border border-dashed">
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
@@ -92,7 +119,7 @@ const RequestsTab = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pendingRequests.map((request) => (
+              {filteredRequests.map((request) => (
                 <TableRow key={request.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">

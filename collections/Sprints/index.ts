@@ -1,10 +1,14 @@
 import { DAY } from "@/lib/constants";
 import type { CollectionConfig } from "payload";
+import { afterSprintChange } from "./hooks/after-change";
 
 export const Sprints: CollectionConfig = {
   slug: "sprints",
   admin: {
     useAsTitle: "title",
+  },
+  hooks: {
+    afterChange: [afterSprintChange],
   },
   fields: [
     {

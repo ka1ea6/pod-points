@@ -1,9 +1,13 @@
 import type { CollectionConfig } from "payload";
+import { afterNotificationChange } from "./hooks/after-change";
 
 export const Notifications: CollectionConfig = {
   slug: "notifications",
   admin: {
     useAsTitle: "title",
+  },
+  hooks: {
+    afterChange: [afterNotificationChange],
   },
   fields: [
     {

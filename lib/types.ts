@@ -15,3 +15,5 @@ export type ActivityWithReactionAndCommentCount = Activity & {
   };
   commentCount: number;
 };
+
+export type SocketArgs<T> = { doc: T; operation: "create" | "update" };

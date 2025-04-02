@@ -51,11 +51,13 @@ export default buildConfig({
   }),
   sharp,
   onInit: () => {
+    console.log("initializing");
+
     websocket.initialize(
       { cors: { origin: "*" } }, // Adjust CORS for production
       process.env.WEBSOCKET_PORT ? parseInt(process.env.WEBSOCKET_PORT) : 3001
     );
 
-    // console.log("onInit end:", Date.now());
+    console.log("onInit end:", Date.now());
   },
 });

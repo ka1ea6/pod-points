@@ -1,10 +1,14 @@
 import type { CollectionConfig } from "payload";
+import { afterUserChange } from "./hooks/after-change";
 
 export const Users: CollectionConfig = {
   slug: "users",
   auth: true,
   admin: {
     useAsTitle: "name",
+  },
+  hooks: {
+    afterChange: [afterUserChange],
   },
   fields: [
     {

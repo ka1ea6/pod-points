@@ -25,6 +25,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { getRecurringTasks, submitTaskForApproval } from "@/actions/tasks";
 import { Task } from "@/payload-types";
 import { useAuth } from "@/providers/auth";
+import { useSocket } from "@/providers/socket";
+import { SocketArgs } from "@/lib/types";
 
 export function RecurringTasks() {
   const [recurringTasks, setRecurringTasks] = useState<Task[]>([]);
@@ -37,6 +39,20 @@ export function RecurringTasks() {
   });
 
   const { user } = useAuth();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("tasks", (args: SocketArgs<Task>) => {
+      if (!args.doc.isRecurring) return;
+      setRecurringTasks((prev) => {
+        return [...prev, { ...args.doc }];
+      });
+    });
+
+    return () => {
+      socket?.off("tasks");
+    };
+  }, [socket]);
 
   const fetchTasks = useCallback(async () => {
     const res = await getRecurringTasks();

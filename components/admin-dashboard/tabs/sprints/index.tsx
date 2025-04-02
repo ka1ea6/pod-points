@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { PlusCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { SprintWithTaskCount } from "@/lib/types";
+import { SocketArgs, SprintWithTaskCount } from "@/lib/types";
 import { getAllSprints } from "@/actions/sprints";
 import { Badge } from "@/components/ui/badge";
 import ExtendDeadlineDialog from "./change-date-range";
@@ -28,6 +28,7 @@ import ActivateSprintDialog from "./activate-sprint";
 import { formatDate } from "@/lib/formatters";
 import AddSprintDialog from "./add-sprint";
 import { useAuth } from "@/providers/auth";
+import { useSocket } from "@/providers/socket";
 
 const SprintsTab = () => {
   const { user } = useAuth();
@@ -39,6 +40,28 @@ const SprintsTab = () => {
   const [addSprintOpen, setAddSprintOpen] = useState(false);
   const [endSprintOpen, setEndSprintOpen] = useState(false);
   const [activateSprintOpen, setActivateSprintOpen] = useState(false);
+
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socket?.on("sprints", (args: SocketArgs<SprintWithTaskCount>) => {
+      if (args.operation === "create") {
+        setSprints((prev) => {
+          return [...prev, args.doc];
+        });
+      } else {
+        setSprints((prev) => {
+          return prev.map((el) => {
+            if (el.id === args.doc.id) return args.doc;
+            return el;
+          });
+        });
+      }
+    });
+    return () => {
+      socket?.off("tasks");
+    };
+  }, [socket]);
 
   const fetchSprints = useCallback(async () => {
     const { sprints } = await getAllSprints();

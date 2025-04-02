@@ -2,12 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { getCurrentUser } from "@/lib/auth";
 import { AdminDashboard } from "@/components/admin-dashboard";
 import { useAuth } from "@/providers/auth";
 
 export default function AdminPage() {
-  // const user = await getCurrentUser();
   const { user, userFetched, fetching } = useAuth();
 
   if (userFetched && !fetching && (!user || user.role !== "lead")) {

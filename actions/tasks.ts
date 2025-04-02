@@ -5,6 +5,7 @@ import config from "@/payload.config";
 import { Task, User } from "@/payload-types";
 import { z } from "zod";
 import { getId } from "@/lib/utils";
+import { getCurrentSprint } from "./sprints";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
@@ -36,12 +37,15 @@ export async function createTask(prevState: any, formData: FormData) {
         id: data.assignee,
       });
 
+    const { sprint } = await getCurrentSprint();
+
     const newTask = await payload.create({
       collection: "tasks",
       data: {
         ...data,
         assignee: assignedUser,
         status: assignedUser ? "in-progress" : "available",
+        sprint,
       },
     });
     return { status: "success", task: newTask };

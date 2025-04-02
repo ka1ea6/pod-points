@@ -40,6 +40,7 @@ export async function createRequest(prevState: any, formData: FormData) {
       data: {
         ...data,
         isRecurring: false,
+        assignee: requestBy,
         status: "pending-approval",
       },
     });
@@ -74,8 +75,6 @@ export async function changeRequestStatus(
       actionBy: userId,
     },
   });
-
-  console.log("request", request);
 
   if (request.task) {
     const taskId = getId(request.task);

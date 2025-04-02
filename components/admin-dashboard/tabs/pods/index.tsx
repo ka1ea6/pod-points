@@ -27,10 +27,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 import { getAllPods } from "@/actions/pods";
-import { PodWithCount } from "@/lib/types";
+import { PodWithCount, SocketArgs } from "@/lib/types";
 import ViewMembersDialog from "./view-memebers";
 import AddPodDialog from "./add-pod";
 import EditPodDialog from "./edit-pod";
+import { Pod, User } from "@/payload-types";
+import { useSocket } from "@/providers/socket";
 
 const PodsTab = () => {
   const [pods, setPods] = useState<PodWithCount[]>([]);
@@ -38,6 +40,7 @@ const PodsTab = () => {
   const [viewMembersOpen, setViewMembersOpen] = useState(false);
   const [addPodOpen, setAddPodOpen] = useState(false);
   const [editPodOpen, setEditPodOpen] = useState(false);
+  const { socket } = useSocket();
 
   const fetchPods = useCallback(async () => {
     const { pods } = await getAllPods();
@@ -47,6 +50,32 @@ const PodsTab = () => {
   useEffect(() => {
     fetchPods();
   }, []);
+
+  useEffect(() => {
+    socket?.on("pods", (args: SocketArgs<PodWithCount>) => {
+      if (args.operation === "create") {
+        setPods((prev) => {
+          return [...prev, args.doc];
+        });
+      } else if (args.operation === "update") {
+        setPods((prev) => {
+          return prev.map((el) => {
+            if (el.id === args.doc.id) return args.doc;
+            else return el;
+          });
+        });
+      }
+    });
+
+    socket?.on("users", (args: SocketArgs<User>) => {
+      fetchPods();
+    });
+
+    return () => {
+      socket?.off("pods");
+      socket?.off("users");
+    };
+  }, [socket]);
 
   const handleViewMembers = (podId: number) => {
     setViewMembersOpen(true);
@@ -60,8 +89,6 @@ const PodsTab = () => {
   useEffect(() => {
     if (!viewMembersOpen && !editPodOpen) setSelectedPodId(null);
   }, [viewMembersOpen, editPodOpen]);
-
-  const [date, setDate] = useState<Date>();
 
   return (
     <>

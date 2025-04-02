@@ -1,11 +1,15 @@
 import type { CollectionConfig } from "payload";
 import { colorPickerField } from "@innovixx/payload-color-picker-field";
 import { BeforeMemberChange } from "./hooks/before-member-change";
+import { afterPodChange } from "./hooks/after-pod-change";
 
 export const Pods: CollectionConfig = {
   slug: "pods",
   admin: {
     useAsTitle: "name",
+  },
+  hooks: {
+    afterChange: [afterPodChange],
   },
   fields: [
     {

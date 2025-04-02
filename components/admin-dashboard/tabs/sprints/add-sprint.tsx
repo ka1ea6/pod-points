@@ -37,7 +37,7 @@ const AddSprintDialog: React.FC<AddSprintDialogProps> = ({ open, setOpen }) => {
   useEffect(() => {
     if (state && state.status === "success") {
       setOpen(false);
-      toast.success("Pod created successfully");
+      toast.success("Sprint created successfully");
     }
   }, [state]);
 
