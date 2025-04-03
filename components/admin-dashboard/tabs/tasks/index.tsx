@@ -173,7 +173,6 @@ const TasksTab = () => {
               open={editTaskOpen}
               setOpen={setEditTaskOpen}
               task={selectedTask}
-              userId={user.id}
             />
           )}
           {deleteTaskOpen && selectedTask && user && (

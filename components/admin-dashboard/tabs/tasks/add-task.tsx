@@ -29,6 +29,7 @@ import { Pod, User } from "@/payload-types";
 import { getAllMembers } from "@/actions/users";
 import { createTask } from "@/actions/tasks";
 import { useAuth } from "@/providers/auth";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddTaskDialogProps {
   open: boolean;
@@ -38,6 +39,7 @@ interface AddTaskDialogProps {
 const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
   const [state, formAction] = useActionState(createTask, {} as any);
   const [members, setMembers] = useState<User[]>([]);
+  const [isRecurring, setIsRecurring] = useState(false);
   const { user } = useAuth();
 
   const fetchMembers = useCallback(async () => {
@@ -79,14 +81,21 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
                 id="description"
                 name="description"
                 className="col-span-3 resize-none"
-                // value={pointRequest.description}
-                // onChange={(e) =>
-                //   setPointRequest({
-                //     ...pointRequest,
-                //     description: e.target.value,
-                //   })
-                // }
                 placeholder="Provide details about the task"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="isRecurring" className="text-right">
+                Is Recurring
+              </Label>
+              <Checkbox
+                id="isRecurring"
+                name="isRecurring"
+                checked={isRecurring}
+                onCheckedChange={(change) => {
+                  setIsRecurring(change === "indeterminate" ? false : change);
+                }}
+                className="col-span-3 resize-none"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -106,33 +115,35 @@ const AddTaskDialog: React.FC<AddTaskDialogProps> = ({ open, setOpen }) => {
                 className="col-span-3"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="points" className="text-right">
-                Assignee
-              </Label>
-              <Select name="assignee">
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        {member.pod && (
-                          <div
-                            className="h-3 w-3 rounded-full"
-                            style={{
-                              backgroundColor: (member.pod as Pod).color,
-                            }}
-                          />
-                        )}
-                        <span>{member.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!isRecurring && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="points" className="text-right">
+                  Assignee
+                </Label>
+                <Select name="assignee">
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select assignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {members.map((member) => (
+                      <SelectItem key={member.id} value={member.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          {member.pod && (
+                            <div
+                              className="h-3 w-3 rounded-full"
+                              style={{
+                                backgroundColor: (member.pod as Pod).color,
+                              }}
+                            />
+                          )}
+                          <span>{member.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button type="submit">Save changes</Button>

@@ -13,6 +13,7 @@ const createTaskSchema = z.object({
   link: z.string(),
   points: z.coerce.number(),
   assignee: z.string().optional(),
+  isRecurring: z.string(),
 });
 
 export async function createTask(prevState: any, formData: FormData) {
@@ -43,6 +44,7 @@ export async function createTask(prevState: any, formData: FormData) {
       collection: "tasks",
       data: {
         ...data,
+        isRecurring: data.isRecurring === "on" ? true : false,
         assignee: assignedUser,
         status: assignedUser ? "in-progress" : "available",
         sprint,
