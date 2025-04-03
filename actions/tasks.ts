@@ -14,7 +14,7 @@ const createTaskSchema = z.object({
   link: z.string(),
   points: z.coerce.number(),
   assignee: z.string().optional(),
-  isRecurring: z.string(),
+  isRecurring: z.string().optional(),
 });
 
 export async function createTask(prevState: any, formData: FormData) {

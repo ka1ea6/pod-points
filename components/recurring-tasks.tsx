@@ -78,8 +78,6 @@ export function RecurringTasks() {
     e.preventDefault();
     if (!selectedTask?.id || !user?.id) return;
 
-    console.log("selecter", selectedTask.id);
-
     await submitTaskForApproval(
       selectedTask?.id,
       pointRequest.evidence,

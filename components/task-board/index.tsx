@@ -39,6 +39,7 @@ import { useSocket } from "@/providers/socket";
 import { useAuth } from "@/providers/auth";
 import { toast } from "sonner";
 import { SocketArgs } from "@/lib/types";
+import { getId } from "@/lib/utils";
 
 // type Task = {
 //   id: string;
@@ -423,24 +424,28 @@ export function TaskBoard() {
                   Claim Task
                 </Button>
               )}
-              {selectedTask?.status === "in-progress" && (
-                <Button
-                  onClick={() => {
-                    onCompleteTask(selectedTask.id);
-                  }}
-                >
-                  Mark as Completed
-                </Button>
-              )}
-              {selectedTask?.status === "completed" && (
-                <Button
-                  onClick={() => {
-                    onRequestApproval(selectedTask.id);
-                  }}
-                >
-                  Submit for Approval
-                </Button>
-              )}
+              {selectedTask?.status === "in-progress" &&
+                selectedTask.assignee &&
+                user &&
+                getId(selectedTask.assignee, "number") === user.id && (
+                  <Button
+                    onClick={() => {
+                      onCompleteTask(selectedTask.id);
+                    }}
+                  >
+                    Mark as Completed
+                  </Button>
+                )}
+              {selectedTask?.status === "completed" &&
+                getId(selectedTask.assignee, "number") === user.id && (
+                  <Button
+                    onClick={() => {
+                      onRequestApproval(selectedTask.id);
+                    }}
+                  >
+                    Submit for Approval
+                  </Button>
+                )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
