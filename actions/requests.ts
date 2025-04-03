@@ -91,7 +91,7 @@ export async function changeRequestStatus(
       collection: "tasks",
       id: taskId,
       data: {
-        status: "approved",
+        status: status === "approved" ? "approved" : "in-progress",
       },
     });
 

@@ -126,46 +126,214 @@ const TasksTab = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tasks.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell>
-                    <span className="font-medium">{task.title}</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">+{task.points}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span>{task.assignee?.name}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span>{getStatus(task.status)}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleAlterTask(task, "edit")}
-                        size="sm"
-                        variant="outline"
-                      >
-                        Edit
-                      </Button>
+              {tasks
+                .filter((el) => !el.isRecurring && !el.fromRecurring)
+                .map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>
+                      <span className="font-medium">{task.title}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">+{task.points}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span>{task.assignee?.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span>{getStatus(task.status)}</span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleAlterTask(task, "edit")}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Edit
+                        </Button>
 
-                      {task.status === "available" && (
-                        <>
-                          <Button
-                            onClick={() => handleAlterTask(task, "delete")}
-                            size="sm"
-                            variant="outline"
-                            className="text-red-500"
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        {task.status === "available" && (
+                          <>
+                            <Button
+                              onClick={() => handleAlterTask(task, "delete")}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-500"
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          {editTaskOpen && selectedTask && user && (
+            <EditTaskDialog
+              open={editTaskOpen}
+              setOpen={setEditTaskOpen}
+              task={selectedTask}
+            />
+          )}
+          {deleteTaskOpen && selectedTask && user && (
+            <DeleteTaskDialog
+              open={deleteTaskOpen}
+              setOpen={setDeleteTaskOpen}
+              taskId={selectedTask.id}
+              userId={user.id}
+            />
+          )}
+          {tasks.length === 0 && (
+            <div className="flex justify-center py-4">
+              <span className="font-bold text-lg">No tasks yet.</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Recurring tasks</CardTitle>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Task Name</TableHead>
+                <TableHead>Points</TableHead>
+                <TableHead>Assigned to</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tasks
+                .filter((el) => el.fromRecurring)
+                .map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>
+                      <span className="font-medium">{task.title}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">+{task.points}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span>{task.assignee?.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span>{getStatus(task.status)}</span>
+                    </TableCell>
+                    {/* <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleAlterTask(task, "edit")}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Edit
+                        </Button>
+
+                        {task.status === "available" && (
+                          <>
+                            <Button
+                              onClick={() => handleAlterTask(task, "delete")}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-500"
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell> */}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          {editTaskOpen && selectedTask && user && (
+            <EditTaskDialog
+              open={editTaskOpen}
+              setOpen={setEditTaskOpen}
+              task={selectedTask}
+            />
+          )}
+          {deleteTaskOpen && selectedTask && user && (
+            <DeleteTaskDialog
+              open={deleteTaskOpen}
+              setOpen={setDeleteTaskOpen}
+              taskId={selectedTask.id}
+              userId={user.id}
+            />
+          )}
+          {tasks.length === 0 && (
+            <div className="flex justify-center py-4">
+              <span className="font-bold text-lg">No tasks yet.</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Recurring task templates</CardTitle>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Task Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Points</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tasks
+                .filter((el) => el.isRecurring)
+                .map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>
+                      <span className="font-medium">{task.title}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-medium">{task.description}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">+{task.points}</Badge>
+                    </TableCell>
+                    {/* <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleAlterTask(task, "edit")}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Edit
+                        </Button>
+
+                        {task.status === "available" && (
+                          <>
+                            <Button
+                              onClick={() => handleAlterTask(task, "delete")}
+                              size="sm"
+                              variant="outline"
+                              className="text-red-500"
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell> */}
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
           {editTaskOpen && selectedTask && user && (

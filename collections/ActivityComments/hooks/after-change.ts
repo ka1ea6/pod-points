@@ -31,7 +31,7 @@ export const afterActivityCommentChange: CollectionAfterChangeHook<
       data: {
         addressedTo: activity.user.id,
         title: "Comment added",
-        description: `Comment added by ${user.name} on ${activity.title} ${activity.action}`,
+        description: `Comment added by ${user.name} on '${activity.description}'`,
       },
     });
 

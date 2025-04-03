@@ -220,7 +220,7 @@ export function PointsActivity() {
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-1 text-sm">
-                        <span className="font-medium">
+                        {/* <span className="font-medium">
                           {getId(currUser, "string") === getId(user, "string")
                             ? "You"
                             : user.name}
@@ -230,7 +230,8 @@ export function PointsActivity() {
                         </span>
                         {activity.title && (
                           <span className="font-medium">{activity.title}</span>
-                        )}
+                        )} */}
+                        <span>{activity.description}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         {activity.points && (

@@ -98,11 +98,11 @@ const Notifications = () => {
                     <li
                       key={notification.id}
                       className={cn(
-                        "border-b border-slate-100 px-4 py-3 hover:bg-slate-50 flex justify-between items-center",
+                        "border-b border-slate-100 px-4 py-3 hover:bg-slate-50 flex justify-between items-center gap-2",
                         !notification.seen && "bg-slate-100"
                       )}
                     >
-                      <div className="flex flex-col">
+                      <div className="flex flex-col overflow-hidden text-ellipsis">
                         <span className="text-sm capitalize">
                           {notification.title}
                         </span>
@@ -114,7 +114,7 @@ const Notifications = () => {
                         </span>
                       </div>
                       {!notification.seen && (
-                        <div className="h-2 w-2 bg-red-500 rounded-full"></div>
+                        <div className="h-2 min-w-2 w-2 bg-red-500 rounded-full"></div>
                       )}
                     </li>
                   );

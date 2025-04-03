@@ -278,6 +278,7 @@ export async function submitTaskForApproval(
         assignee: user,
         status: "pending-approval",
         isRecurring: false,
+        fromRecurring: true,
         sprint,
       },
     });

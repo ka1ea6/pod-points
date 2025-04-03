@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays } from "lucide-react";
-import { getAllPods } from "@/actions/pods";
 import { Sprint } from "@/payload-types";
 import {
   getCurrentSprint,

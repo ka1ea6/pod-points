@@ -29,6 +29,7 @@ export const afterTaskChange: CollectionAfterChangeHook<Task> = async ({
   }
 
   if (currAssignee) {
+    // changing user
     if (!prevAssignee || currAssignee !== prevAssignee) {
       if (currAssignee)
         await req.payload.create({
@@ -39,6 +40,20 @@ export const afterTaskChange: CollectionAfterChangeHook<Task> = async ({
             description: `You have been assigned to task ${doc.title}.`,
           },
         });
+    }
+
+    if (doc.status === "approved" && previousDoc.status !== doc.status) {
+      const user = await req.payload.findByID({
+        collection: "users",
+        id: currAssignee,
+      });
+      await req.payload.update({
+        collection: "users",
+        id: currAssignee,
+        data: {
+          totalPoints: (user.totalPoints || 0) + doc.points,
+        },
+      });
     }
   }
 

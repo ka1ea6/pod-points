@@ -1,9 +1,10 @@
 import { getUser } from "@/actions/users";
 import { getId } from "@/lib/utils";
+import { Activity, Request } from "@/payload-types";
 import { websocket } from "@/services";
 import { CollectionAfterChangeHook } from "payload";
 
-export const afterRequestChange: CollectionAfterChangeHook = async ({
+export const afterRequestChange: CollectionAfterChangeHook<Request> = async ({
   operation,
   doc,
   req,
@@ -12,6 +13,17 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
 
   const { member: user } = await getUser();
 
+  // const {
+  //   docs: [requester],
+  // } = await req.payload.find({
+  //   collection: "users",
+  //   where: {
+  //     id: {
+  //       equals: doc.requestBy.id,
+  //     },
+  //   },
+  // });
+
   if (!user) return;
 
   socket?.emit("request", {
@@ -19,15 +31,32 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
     operation,
   });
 
+  let activity: Partial<Activity> = {
+    user: user.id,
+    action: doc.status,
+    points: doc.points,
+  };
+
+  if (doc.status === "requested") {
+    activity.title = `Request approval query`;
+    activity.description = `${user?.name} Requested approval for ${doc.title}.`;
+  } else if (doc.status === "approved") {
+    activity.title = `Request Approval`;
+    activity.description = `${user?.name} approved request ${doc.title} from ${doc.requestBy.name}`;
+  } else {
+    activity.title = `Request Rejection`;
+    activity.description = `${user?.name} rejected request ${doc.title} from ${doc.requestBy.name}`;
+  }
   await req.payload.create({
     collection: "activities",
     data: {
       // user: doc.requestBy,
-      user: user.id,
-      title: doc.title,
-      action: doc.status,
-      points: doc.points,
-      description: doc.description,
+      // user: user.id,
+      // title: `Request approval`,
+      // action: doc.status,
+      // points: doc.points,
+      // description: `${user?.name} approved request ${doc.title} from ${doc.requestBy.name}`,
+      ...activity,
     },
   });
 

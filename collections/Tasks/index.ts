@@ -74,6 +74,16 @@ export const Tasks: CollectionConfig = {
       defaultValue: false,
     },
     {
+      name: "fromRecurring",
+      type: "checkbox",
+      admin: {
+        description:
+          "Field to signify wether task was copied from recurring task",
+        position: "sidebar",
+      },
+      defaultValue: false,
+    },
+    {
       name: "sprint",
       type: "relationship",
       relationTo: "sprints",

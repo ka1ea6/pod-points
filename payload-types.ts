@@ -243,6 +243,10 @@ export interface Task {
   assignee?: (number | null) | User;
   assignedBy?: (number | null) | User;
   isRecurring?: boolean | null;
+  /**
+   * Field to signify wether task was copied from recurring task
+   */
+  fromRecurring?: boolean | null;
   sprint?: (number | null) | Sprint;
   updatedAt: string;
   createdAt: string;
@@ -423,6 +427,7 @@ export interface TasksSelect<T extends boolean = true> {
   assignee?: T;
   assignedBy?: T;
   isRecurring?: T;
+  fromRecurring?: T;
   sprint?: T;
   updatedAt?: T;
   createdAt?: T;
