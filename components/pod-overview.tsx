@@ -63,7 +63,7 @@ export function PodOverview() {
 
   const fetchCurrentSprint = useCallback(async () => {
     const res = await getCurrentSprint();
-    setCurrentSprint(res.sprint);
+    setCurrentSprint(res);
     if (!res) fetchLastSprint();
   }, []);
 

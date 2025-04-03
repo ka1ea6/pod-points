@@ -5,6 +5,7 @@ import config from "@payload-config";
 import { z } from "zod";
 import { Request } from "@/payload-types";
 import { getId } from "@/lib/utils";
+import { getUser } from "./users";
 
 const createRequestSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
@@ -62,17 +63,25 @@ export async function createRequest(prevState: any, formData: FormData) {
 
 export async function changeRequestStatus(
   requestId: number,
-  userId: number,
   status: Request["status"]
 ) {
   const payload = await getPayload({ config });
+  const user = await getUser();
+
+  if (!user || !user.member)
+    return {
+      status: "error",
+      errors: {
+        user: ["user is required"],
+      },
+    };
 
   const request = await payload.update({
     collection: "requests",
     id: requestId,
     data: {
       status,
-      actionBy: userId,
+      actionBy: user.member.id,
     },
   });
 

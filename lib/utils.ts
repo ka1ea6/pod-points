@@ -20,3 +20,16 @@ export function getId(
 
   return returnAs === "number" ? id : id.toString();
 }
+
+const sub = (a: number, b: number) => a - b;
+
+export function sortItems<T>(
+  item: { createdAt: string }[],
+  mode: "asc" | "dec" = "dec"
+) {
+  return item.toSorted((a, b) =>
+    mode === "asc"
+      ? sub(new Date(a.createdAt).getTime(), new Date(b.createdAt).getTime())
+      : sub(new Date(b.createdAt).getTime(), new Date(a.createdAt).getTime())
+  ) as T[];
+}

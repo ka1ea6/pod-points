@@ -68,7 +68,9 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
           description: `${req.user?.name} approved request ${doc.title}`,
         },
       });
-    } else if (task.assignee) {
+    }
+
+    if (task.assignee) {
       await req.payload.create({
         collection: "notifications",
         data: {

@@ -8,12 +8,11 @@ export const beforeTaskChange: CollectionBeforeChangeHook<Task> = async ({
   data,
   req,
 }) => {
-  if (!originalDoc) return;
+  if (!originalDoc || data.isRecurring) return;
 
   //// handle status change
-
   if (originalDoc.status !== data.status && data.status === "approved") {
-    const { sprint: sprint } = await getCurrentSprint();
+    const sprint = await getCurrentSprint();
     data.sprint = sprint?.id;
   }
 

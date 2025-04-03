@@ -247,7 +247,6 @@ export function TaskBoard() {
       if (!user) return;
       const task = await submitTaskForApproval(
         taskId,
-        user.id,
         approvalEvidence,
         approvalDescription
       );

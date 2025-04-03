@@ -6,6 +6,7 @@ import { Task, User } from "@/payload-types";
 import { z } from "zod";
 import { getId } from "@/lib/utils";
 import { getCurrentSprint } from "./sprints";
+import { getUser } from "./users";
 
 const createTaskSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
@@ -38,18 +39,21 @@ export async function createTask(prevState: any, formData: FormData) {
         id: data.assignee,
       });
 
-    const { sprint } = await getCurrentSprint();
+    const sprint = await getCurrentSprint();
+
+    const isDataRecurring = data.isRecurring === "on";
 
     const newTask = await payload.create({
       collection: "tasks",
       data: {
         ...data,
-        isRecurring: data.isRecurring === "on" ? true : false,
-        assignee: assignedUser,
+        isRecurring: isDataRecurring,
+        assignee: isDataRecurring ? null : assignedUser,
         status: assignedUser ? "in-progress" : "available",
-        sprint,
+        sprint: isDataRecurring ? null : sprint,
       },
     });
+
     return { status: "success", task: newTask };
   } catch (err) {
     console.error("err", err);
@@ -230,11 +234,15 @@ export async function completeTask(taskId: number, userId: number) {
 
 export async function submitTaskForApproval(
   taskId: number,
-  userId: number,
   evidence: string,
   description?: string
 ) {
   const payload = await getPayload({ config });
+
+  const usr = await getUser();
+
+  if (!usr || !usr.member)
+    return { status: "error", errors: "User is required" };
 
   const task = await payload.findByID({
     collection: "tasks",
@@ -247,7 +255,7 @@ export async function submitTaskForApproval(
 
   const user = await payload.findByID({
     collection: "users",
-    id: userId,
+    id: usr.member?.id,
   });
 
   if (!user) return { status: "error", message: "User not found" };
@@ -260,18 +268,7 @@ export async function submitTaskForApproval(
       message: "You're not assigned to you. You can't submit it for approval.",
     };
 
-  const request = await payload.create({
-    collection: "requests",
-    data: {
-      task: task,
-      requestBy: user,
-      status: "requested",
-      title: task.title,
-      description: description,
-      points: task.points,
-      evidence: evidence,
-    },
-  });
+  const sprint = await getCurrentSprint();
 
   if (task.isRecurring) {
     const createdTask = await payload.create({
@@ -281,11 +278,38 @@ export async function submitTaskForApproval(
         assignee: user,
         status: "pending-approval",
         isRecurring: false,
+        sprint,
       },
     });
 
-    return { status: "success", task: createdTask };
+    const request = await payload.create({
+      collection: "requests",
+      data: {
+        task: createdTask,
+        requestBy: user,
+        status: "requested",
+        title: task.title,
+        description: description,
+        points: task.points,
+        evidence: evidence,
+      },
+    });
+
+    return { status: "success", task: createdTask, request };
   } else {
+    const request = await payload.create({
+      collection: "requests",
+      data: {
+        task: task,
+        requestBy: user,
+        status: "requested",
+        title: task.title,
+        description: description,
+        points: task.points,
+        evidence: evidence,
+      },
+    });
+
     const pendingTask = await payload.update({
       collection: "tasks",
       where: {

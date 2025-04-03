@@ -61,11 +61,7 @@ const RequestsTab = () => {
 
   const handleApprove = useCallback(async (id: number) => {
     if (!user) return;
-    const { request, status } = await changeRequestStatus(
-      id,
-      user.id,
-      "approved"
-    );
+    const { request, status } = await changeRequestStatus(id, "approved");
     if (status === "success") {
       toast.success(
         `Request by ${request.requestBy.name} for task ${request.title} has been approved`
@@ -76,7 +72,7 @@ const RequestsTab = () => {
   }, []);
 
   const handleReject = useCallback(async (id: number) => {
-    const { request, status } = await changeRequestStatus(id, 1, "rejected");
+    const { request, status } = await changeRequestStatus(id, "rejected");
     if (status === "success") {
       toast.error(
         `Request by ${request.requestBy.name} for task ${request.title} has been rejected`

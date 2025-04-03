@@ -53,9 +53,9 @@ export async function getCurrentSprint() {
     },
   });
 
-  if (sprint.docs && sprint.docs.length > 0) return { sprint: sprint.docs[0] };
+  if (sprint.docs && sprint.docs.length > 0) return sprint.docs[0];
 
-  return { sprint: null };
+  return null;
 }
 
 export async function getSprintStats() {
@@ -65,7 +65,7 @@ export async function getSprintStats() {
     collection: "pods",
   });
 
-  const { sprint: currSprint } = await getCurrentSprint();
+  const currSprint = await getCurrentSprint();
 
   if (!currSprint) return { status: "success", stats: [] };
 

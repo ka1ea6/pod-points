@@ -1,8 +1,8 @@
 "use client";
 
-import { use, useActionState, useCallback, useEffect, useState } from "react";
-import { add, formatDistanceToNow } from "date-fns";
-import { Dot, Heart, MessageSquare, ThumbsUp } from "lucide-react";
+import { useActionState, useCallback, useEffect, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { Heart, MessageSquare, ThumbsUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,10 +13,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ActivityComment, ActivityReaction, User } from "@/payload-types";
+import {
+  Activity,
+  ActivityComment,
+  ActivityReaction,
+  User,
+} from "@/payload-types";
 import { getAllUserActivities } from "@/actions/activities";
 import { ActivityWithReactionAndCommentCount, SocketArgs } from "@/lib/types";
-import { cn, getId } from "@/lib/utils";
+import { cn, getId, sortItems } from "@/lib/utils";
 import { addActivityReaction } from "@/actions/activityReactions";
 import { addComment, getActivityComments } from "@/actions/activityComments";
 import { formatDate } from "@/lib/formatters";
@@ -40,6 +45,35 @@ export function PointsActivity() {
   const { socket } = useSocket();
 
   useEffect(() => {
+    socket?.on("activity", (args: SocketArgs<Activity>) => {
+      if (args.operation === "create") {
+        setActivities((prev) => {
+          return [
+            ...prev,
+            {
+              ...args.doc,
+              commentCount: 0,
+              reactions: {
+                heart: { count: 0, userLiked: false },
+                like: { count: 0, userLiked: false },
+              },
+            },
+          ];
+        });
+      } else {
+        setActivities((prev) => {
+          return prev.map((el) =>
+            el.id === args.doc.id
+              ? {
+                  ...args.doc,
+                  commentCount: el.commentCount,
+                  reactions: el.reactions,
+                }
+              : el
+          );
+        });
+      }
+    });
     socket?.on("activity-comments", (args: SocketArgs<ActivityComment>) => {
       if (args.operation === "create") {
         setComments((prev) => {
@@ -164,7 +198,7 @@ export function PointsActivity() {
           </div>
         ) : (
           <div className="space-y-4">
-            {activities.map((activity) => {
+            {sortItems<Activity>(activities).map((activity) => {
               const user = activity.user as User;
               return (
                 <div key={activity.id} className="flex flex-col">

@@ -44,9 +44,15 @@ export function RecurringTasks() {
   useEffect(() => {
     socket?.on("tasks", (args: SocketArgs<Task>) => {
       if (!args.doc.isRecurring) return;
-      setRecurringTasks((prev) => {
-        return [...prev, { ...args.doc }];
-      });
+      if (args.operation === "create") {
+        setRecurringTasks((prev) => {
+          return [...prev, { ...args.doc }];
+        });
+      } else {
+        setRecurringTasks((prev) => {
+          return prev.map((el) => (el.id === args.doc.id ? args.doc : el));
+        });
+      }
     });
 
     return () => {
@@ -70,15 +76,12 @@ export function RecurringTasks() {
 
   const handlePointRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Recurring task point request submitted:", {
-      ...selectedTask,
-      ...pointRequest,
-    });
     if (!selectedTask?.id || !user?.id) return;
 
-    const res = await submitTaskForApproval(
+    console.log("selecter", selectedTask.id);
+
+    await submitTaskForApproval(
       selectedTask?.id,
-      user?.id,
       pointRequest.evidence,
       pointRequest.description
     );
