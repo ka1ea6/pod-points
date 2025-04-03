@@ -1,3 +1,4 @@
+import { getUser } from "@/actions/users";
 import { getId } from "@/lib/utils";
 import { websocket } from "@/services";
 import { CollectionAfterChangeHook } from "payload";
@@ -9,6 +10,10 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
 }) => {
   const socket = websocket.getIO();
 
+  const { member: user } = await getUser();
+
+  if (!user) return;
+
   socket?.emit("request", {
     doc,
     operation,
@@ -17,7 +22,8 @@ export const afterRequestChange: CollectionAfterChangeHook = async ({
   await req.payload.create({
     collection: "activities",
     data: {
-      user: doc.requestBy,
+      // user: doc.requestBy,
+      user: user.id,
       title: doc.title,
       action: doc.status,
       points: doc.points,
