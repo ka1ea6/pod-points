@@ -18,6 +18,10 @@ import { Pods } from "./collections/Pods";
 import { Requests } from "./collections/Requests";
 import { websocket } from "./services";
 
+import cron from "node-cron";
+import { handleSprintEnd } from "./jobs/handleSprintEnd";
+import { startCron } from "./jobs";
+
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
@@ -58,6 +62,7 @@ export default buildConfig({
       process.env.WEBSOCKET_PORT ? parseInt(process.env.WEBSOCKET_PORT) : 3001
     );
 
+    startCron();
     console.log("onInit end:", Date.now());
   },
 });
