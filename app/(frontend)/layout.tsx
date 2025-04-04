@@ -24,7 +24,7 @@ export default function RootLayout({
         <Providers>
           <div className="flex min-h-screen flex-col">
             <DashboardHeader />
-            {children}
+            <main className="flex-1">{children}</main>
           </div>
         </Providers>
         <Toaster />

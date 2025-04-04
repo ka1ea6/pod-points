@@ -314,10 +314,10 @@ export function PointsActivity() {
                       {commentsLoading[activity.id] ? (
                         <div className="w-[calc(100%-5rem)] ml-16 min-h-10 flex flex-col gap-2">
                           {Array.from({ length: activity.commentCount }).map(
-                            (el) => {
+                            (_, idx) => {
                               return (
                                 <Skeleton
-                                  key={`comment-skeleton-${activity.id}-${el}`}
+                                  key={`comment-skeleton-${activity.id}-${idx}`}
                                   className="w-full h-10"
                                 />
                               );

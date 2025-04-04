@@ -30,7 +30,7 @@ const Page = () => {
   }, []);
 
   return (
-    <main className="flex-1 space-y-6 p-6 md:p-8">
+    <div className="h-full space-y-6 p-6 md:p-8">
       {currUser?.pod ? (
         <Card>
           <CardHeader>
@@ -88,15 +88,16 @@ const Page = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex h-full flex-1 items-center justify-center">
-          <Card>
-            <CardHeader>
-              <CardTitle>You don't have a pod</CardTitle>
-            </CardHeader>
-          </Card>
+        <div className="flex h-full min-h-[calc(100vh-10rem)] items-center justify-center">
+          <div className="max-w-[400px] text-center">
+            <h1 className="font-bold text-lg">
+              Sorry, You don't have a pod. You'll get pod stats after joining a
+              Pod.
+            </h1>
+          </div>
         </div>
       )}
-    </main>
+    </div>
   );
 };
 
