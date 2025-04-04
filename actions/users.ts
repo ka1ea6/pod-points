@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Pod, User } from "@/payload-types";
 import { generateRandomPassword } from "@/lib/random-password-generator";
 import { cookies, headers } from "next/headers";
-import { sanitizeResponse } from "@/lib/utils";
+import { getId, sanitizeResponse } from "@/lib/utils";
 
 const createMemberSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
@@ -158,4 +158,53 @@ export async function getAllMembers() {
   });
 
   return { members };
+}
+
+export async function getPodMembers() {
+  const { member: user } = await getUser();
+
+  if (!user) return { status: "error", error: "User not found" };
+
+  const payload = await getPayload({ config });
+
+  if (!user.pod) return { status: "success", members: [] };
+
+  const podId = getId(user.pod);
+
+  const { docs: users } = await payload.find({
+    collection: "users",
+    where: {
+      "pod.id": {
+        equals: podId,
+      },
+    },
+  });
+
+  const usersWithTaskCount = await Promise.all(
+    users.map(async (user) => {
+      const { docs: userTasks } = await payload.find({
+        collection: "tasks",
+        where: {
+          "assignee.id": {
+            equals: user.id,
+          },
+        },
+      });
+
+      return {
+        ...user,
+        tasks: {
+          "in-progress": userTasks.filter((el) => el.status === "in-progress")
+            .length,
+          completed: userTasks.filter((el) => el.status === "completed").length,
+          "pending-approval": userTasks.filter(
+            (el) => el.status === "pending-approval"
+          ).length,
+          approved: userTasks.filter((el) => el.status === "approved").length,
+        },
+      };
+    })
+  );
+
+  return { status: "success", members: usersWithTaskCount };
 }

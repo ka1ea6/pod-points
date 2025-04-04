@@ -1,5 +1,11 @@
-import { Activity, Pod, Sprint } from "@/payload-types";
+import { Activity, Pod, Sprint, Task, User } from "@/payload-types";
 
+export type UserWithTaskCount = User & {
+  tasks: Record<
+    "in-progress" | "completed" | "pending-approval" | "approved",
+    number
+  >;
+};
 export type PodWithCount = Pod & { memberCount: number };
 export type SprintStats = PodWithCount & { points: number };
 export type SprintWithTaskCount = Sprint & { taskCount: number };

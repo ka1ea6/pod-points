@@ -24,11 +24,12 @@ import { ActivityWithReactionAndCommentCount, SocketArgs } from "@/lib/types";
 import { cn, getId, sortItems } from "@/lib/utils";
 import { addActivityReaction } from "@/actions/activityReactions";
 import { addComment, getActivityComments } from "@/actions/activityComments";
-import { formatDate } from "@/lib/formatters";
+import { dateDisplay, formatDate } from "@/lib/formatters";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/auth";
 import { useSocket } from "@/providers/socket";
+import { Skeleton } from "./ui/skeleton";
 
 export function PointsActivity() {
   const [state, formAction] = useActionState(addComment, {} as any);
@@ -38,7 +39,9 @@ export function PointsActivity() {
   const [commentViewMap, setCommentViewMap] = useState<Record<string, boolean>>(
     {}
   );
-
+  const [commentsLoading, setCommentsLoading] = useState<
+    Record<string, boolean>
+  >({});
   const [comments, setComments] = useState<Record<number, ActivityComment[]>>(
     {}
   );
@@ -118,6 +121,11 @@ export function PointsActivity() {
   }, [currUser]);
 
   const fetchActivityComments = useCallback(async (activityId: number) => {
+    setCommentsLoading((prev) => {
+      prev[activityId] = true;
+
+      return prev;
+    });
     const res = await getActivityComments(activityId);
     setComments((prev) => {
       const copy = { ...prev };
@@ -127,6 +135,11 @@ export function PointsActivity() {
       }
 
       return copy;
+    });
+    setCommentsLoading((prev) => {
+      prev[activityId] = false;
+
+      return prev;
     });
   }, []);
 
@@ -297,62 +310,81 @@ export function PointsActivity() {
                     </div>
                   </div>
                   {commentViewMap[activity.id] && (
-                    <ul className="flex flex-col gap-3">
-                      {comments[activity.id]?.map((comment) => {
-                        return (
-                          <li
-                            key={comment.id}
-                            className="w-[calc(100%-5rem)] text-justify min-h-10 ml-16 flex flex-col gap-1"
-                          >
-                            <div className="flex gap-2 items-center">
-                              <Avatar className="h-4 w-4 border">
-                                <AvatarImage
-                                  // src={activity.user.avatar}
-                                  alt={comment.user.name}
+                    <>
+                      {commentsLoading[activity.id] ? (
+                        <div className="w-[calc(100%-5rem)] ml-16 min-h-10 flex flex-col gap-2">
+                          {Array.from({ length: activity.commentCount }).map(
+                            (el) => {
+                              return (
+                                <Skeleton
+                                  key={`comment-skeleton-${activity.id}-${el}`}
+                                  className="w-full h-10"
                                 />
-                                <AvatarFallback className="text-xs">
-                                  {user.name.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex gap-4 items-center ">
-                                <span className="font-bold text-sm">
-                                  {comment.user.name}
-                                </span>
-                                <span className="font-thin text-xs text-slate-400">
-                                  {formatDate(new Date(comment.createdAt))}
-                                </span>
+                              );
+                            }
+                          )}
+                        </div>
+                      ) : (
+                        <ul className="flex flex-col gap-3">
+                          {comments[activity.id]?.map((comment) => {
+                            return (
+                              <li
+                                key={comment.id}
+                                className="w-[calc(100%-5rem)] text-justify min-h-10 ml-16 flex flex-col gap-1"
+                              >
+                                <div className="flex gap-2 items-center">
+                                  <Avatar className="h-4 w-4 border">
+                                    <AvatarImage
+                                      // src={activity.user.avatar}
+                                      alt={comment.user.name}
+                                    />
+                                    <AvatarFallback className="text-xs">
+                                      {user.name.charAt(0)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex gap-4 items-center ">
+                                    <span className="font-bold text-sm">
+                                      {comment.user.name}
+                                    </span>
+                                    <span className="font-light text-xs text-slate-600">
+                                      {dateDisplay(new Date(comment.createdAt))}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="ml-6">
+                                  <span className="text-sm">
+                                    {comment.comment}
+                                  </span>
+                                </div>
+                              </li>
+                            );
+                          })}
+                          <li className="w-[calc(100%-5rem)] ml-20">
+                            <form
+                              action={formAction}
+                              className="  flex flex-col gap-4"
+                            >
+                              <input
+                                type="hidden"
+                                name="activityId"
+                                value={activity.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="userId"
+                                value={currUser?.id}
+                              />
+                              <Input type="text" name="comment" />
+                              <div className="w-full flex justify-end">
+                                <Button variant={"default"} size={"sm"}>
+                                  Add comment
+                                </Button>
                               </div>
-                            </div>
-                            <div className="ml-6">
-                              <span className="text-sm">{comment.comment}</span>
-                            </div>
+                            </form>
                           </li>
-                        );
-                      })}
-                      <li className="w-[calc(100%-5rem)] ml-20">
-                        <form
-                          action={formAction}
-                          className="  flex flex-col gap-4"
-                        >
-                          <input
-                            type="hidden"
-                            name="activityId"
-                            value={activity.id}
-                          />
-                          <input
-                            type="hidden"
-                            name="userId"
-                            value={currUser?.id}
-                          />
-                          <Input type="text" name="comment" />
-                          <div className="w-full flex justify-end">
-                            <Button variant={"default"} size={"sm"}>
-                              Add comment
-                            </Button>
-                          </div>
-                        </form>
-                      </li>
-                    </ul>
+                        </ul>
+                      )}
+                    </>
                   )}
                 </div>
               );

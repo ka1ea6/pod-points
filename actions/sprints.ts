@@ -58,16 +58,12 @@ export async function getCurrentSprint() {
   return null;
 }
 
-export async function getSprintStats() {
+export async function getSprintStats(sprintId: number) {
   const payload = await getPayload({ config });
 
   const { docs: pods } = await payload.find({
     collection: "pods",
   });
-
-  const currSprint = await getCurrentSprint();
-
-  if (!currSprint) return { status: "success", stats: [] };
 
   const stats = await Promise.all(
     pods.map(async (pod) => {
@@ -80,7 +76,7 @@ export async function getSprintStats() {
         },
       });
 
-      const { docs: pods } = await payload.find({
+      const { docs: tasks } = await payload.find({
         collection: "tasks",
         where: {
           and: [
@@ -91,14 +87,14 @@ export async function getSprintStats() {
             },
             {
               "sprint.id": {
-                equals: currSprint.id,
+                equals: sprintId,
               },
             },
           ],
         },
       });
 
-      const points = pods.reduce((acc, curr) => {
+      const points = tasks.reduce((acc, curr) => {
         return acc + curr.points;
       }, 0);
 

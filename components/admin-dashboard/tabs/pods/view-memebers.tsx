@@ -56,25 +56,27 @@ const ViewMembersDialog: React.FC<ViewMembersDialogProps> = ({
           <>
             {members.length > 0 ? (
               <ul className="flex flex-col gap-1">
-                {members.map((el) => {
-                  return (
-                    <li key={el.id}>
-                      <Card className="">
-                        <CardContent className="px-4 py-2 flex justify-between">
-                          <div className="flex flex-col">
-                            <span className="font-medium">{el.name}</span>
-                            <span className="text-xs">{el.email}</span>
-                          </div>
-                          <div className="">
-                            <div className="rounded-full p-2 border text-sm font-bold">
-                              +{el.totalPoints}
+                {members
+                  .sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0))
+                  .map((el) => {
+                    return (
+                      <li key={el.id}>
+                        <Card className="">
+                          <CardContent className="px-4 py-2 flex justify-between">
+                            <div className="flex flex-col">
+                              <span className="font-medium">{el.name}</span>
+                              <span className="text-xs">{el.email}</span>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </li>
-                  );
-                })}
+                            <div className="">
+                              <div className="rounded-full p-2 border text-sm font-bold">
+                                +{el.totalPoints}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </li>
+                    );
+                  })}
               </ul>
             ) : (
               <div className="flex justify-center items-center py-4">

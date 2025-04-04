@@ -67,7 +67,7 @@ export function DashboardHeader() {
               >
                 My Pod
               </Link>
-              <Link
+              {/* <Link
                 href="/tasks"
                 className={cn(
                   "transition-colors hover:text-foreground/80",
@@ -77,7 +77,7 @@ export function DashboardHeader() {
                 )}
               >
                 Tasks
-              </Link>
+              </Link> */}
               <Link
                 href="/leaderboard"
                 className={cn(

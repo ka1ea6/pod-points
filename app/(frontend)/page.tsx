@@ -30,8 +30,7 @@ export default function HomePage() {
   }, [email, password]);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <DashboardHeader />
+    <>
       {user ? (
         <main className="flex-1 space-y-6 p-6 md:p-8">
           <div className="grid gap-6 md:grid-cols-2">
@@ -83,6 +82,6 @@ export default function HomePage() {
           )}
         </main>
       )}
-    </div>
+    </>
   );
 }

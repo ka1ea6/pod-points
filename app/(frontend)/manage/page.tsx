@@ -13,8 +13,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <DashboardHeader />
+    <>
       {/* {true ? ( */}
       {!userFetched || fetching ? (
         <div className="h-full flex-1 flex items-center justify-center">
@@ -25,6 +24,6 @@ export default function AdminPage() {
           <AdminDashboard />
         </main>
       )}
-    </div>
+    </>
   );
 }

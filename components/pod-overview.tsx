@@ -15,6 +15,7 @@ import {
 } from "@/actions/sprints";
 import { PodWithCount, SocketArgs, SprintStats } from "@/lib/types";
 import { useSocket } from "@/providers/socket";
+import { cn } from "@/lib/utils";
 
 export function PodOverview() {
   const [pods, setPods] = useState<SprintStats[]>([]);
@@ -51,9 +52,11 @@ export function PodOverview() {
   }, [socket]);
 
   const fetchStats = useCallback(async () => {
-    const { stats } = await getSprintStats();
+    const { stats } = await getSprintStats(
+      currentSprint ? currentSprint.id : lastSprint?.id || -1
+    );
     if (stats) setPods(stats);
-  }, []);
+  }, [currentSprint, lastSprint]);
 
   const fetchLastSprint = useCallback(async () => {
     const res = await getLastSprint();
@@ -68,6 +71,9 @@ export function PodOverview() {
 
   useEffect(() => {
     fetchStats();
+  }, [currentSprint, lastSprint]);
+
+  useEffect(() => {
     fetchCurrentSprint();
   }, []);
 
@@ -91,14 +97,21 @@ export function PodOverview() {
           <CardTitle>Pod Overview</CardTitle>
           {(currentSprint || lastSprint) && (
             <div className="flex gap-2 items-center">
-              <span>
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  lastSprint ? "text-red-400" : "text-blue-400"
+                )}
+              >
                 Sprint -{" "}
                 {currentSprint ? currentSprint.title : lastSprint?.title}
               </span>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <CalendarDays className="h-3.5 w-3.5" />
-                <span>{daysLeft} days left</span>
-              </Badge>
+              {currentSprint && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  <span>{daysLeft} days left</span>
+                </Badge>
+              )}
             </div>
           )}
         </div>
