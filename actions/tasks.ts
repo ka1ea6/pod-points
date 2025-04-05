@@ -12,7 +12,9 @@ const createTaskSchema = z.object({
   title: z.string().min(1, { message: "Title is required." }),
   description: z.string().min(1, { message: "Description is required." }),
   link: z.string(),
-  points: z.coerce.number(),
+  points: z.coerce
+    .number()
+    .positive({ message: "Points must be greater than 0" }),
   assignee: z.string().optional(),
   isRecurring: z.string().optional(),
 });

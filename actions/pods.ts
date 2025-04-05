@@ -40,6 +40,7 @@ export async function createPod(prevState: any, formData: FormData) {
         errors: {
           color: ["Color must be unique"],
         },
+        data: formEntry,
       };
     }
   }

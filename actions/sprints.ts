@@ -7,8 +7,8 @@ import { Sprint } from "@/payload-types";
 import { z } from "zod";
 
 const createSprintSchema = z.object({
-  title: z.string(),
-  description: z.string(),
+  title: z.string().min(1, { message: "Title is required." }),
+  description: z.string().min(1, { message: "Description is required." }),
   startDate: z.coerce.date({ message: "Start date is required." }),
   deadline: z.coerce.date({ message: "Deadline is required." }),
 });
@@ -20,6 +20,18 @@ export async function createSprint(prevState: any, formData: FormData) {
   if (!success) {
     return {
       errors: error.flatten().fieldErrors,
+      data: formEntry,
+    };
+  }
+
+  if (
+    new Date(formEntry.startDate as string).getTime() ===
+    new Date(formEntry.deadline as string).getTime()
+  ) {
+    return {
+      errors: {
+        deadline: ["Deadline must be after start date."],
+      },
       data: formEntry,
     };
   }
