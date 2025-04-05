@@ -1,3 +1,4 @@
+import { getId } from "@/lib/utils";
 import { User } from "@/payload-types";
 import { websocket } from "@/services";
 import { CollectionAfterChangeHook } from "payload";
@@ -14,13 +15,15 @@ export const afterUserChange: CollectionAfterChangeHook<User> = async ({
 
   if (operation === "update") {
     // pod change
-    if (doc.pod !== previousDoc.pod) {
+    const currPodId = getId(doc.pod, "string");
+    const prevPodId = getId(previousDoc.pod, "string");
+    if (currPodId !== prevPodId) {
       await req.payload.create({
         collection: "notifications",
         data: {
           addressedTo: doc.id,
           title: "Pod assignment",
-          description: `You've been assigned to pod ${doc.pod?.name}`,
+          description: `You've been assigned to pod ${doc?.pod?.name}`,
           link: "",
         },
       });

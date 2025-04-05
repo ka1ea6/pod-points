@@ -41,6 +41,11 @@ export const Users: CollectionConfig = {
       name: "pod",
       type: "relationship",
       relationTo: "pods",
+      required: false,
+      hasMany: false,
+      admin: {
+        allowCreate: false,
+      },
     },
   ],
 };

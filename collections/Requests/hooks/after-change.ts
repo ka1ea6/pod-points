@@ -84,13 +84,14 @@ export const afterRequestChange: CollectionAfterChangeHook<Request> = async ({
     );
   }
 
-  if (doc.status === "approved" && doc.task) {
+  if (doc.task && (doc.status === "approved" || doc.status === "rejected")) {
     const taskId = getId(doc.task);
+
     const task = await req.payload.update({
       collection: "tasks",
       id: taskId,
       data: {
-        status: "approved",
+        status: doc.status === "approved" ? "approved" : "in-progress",
       },
     });
 
@@ -99,8 +100,11 @@ export const afterRequestChange: CollectionAfterChangeHook<Request> = async ({
         collection: "notifications",
         data: {
           addressedTo: task.assignedBy,
-          title: "Request approval",
-          description: `${req.user?.name} approved request ${doc.title}`,
+          title:
+            doc.status === "approved"
+              ? "Request approval"
+              : "Request Rejection",
+          description: `${user?.name} ${doc.status === "approved" ? "approved" : "rejected"} request ${doc.title}`,
         },
       });
     }
@@ -110,8 +114,11 @@ export const afterRequestChange: CollectionAfterChangeHook<Request> = async ({
         collection: "notifications",
         data: {
           addressedTo: task.assignee,
-          title: "Request approval",
-          description: `${req.user?.name} approved request ${doc.title}`,
+          title:
+            doc.status === "approved"
+              ? "Request approval"
+              : "Request Rejection",
+          description: `${user?.name} ${doc.status === "approved" ? "approved" : "rejected"} request ${doc.title}`,
         },
       });
     }

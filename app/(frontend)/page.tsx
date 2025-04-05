@@ -41,7 +41,7 @@ export default function HomePage() {
           <TaskBoard />
         </main>
       ) : (
-        <main className="w-full flex-1 border flex items-center justify-center">
+        <main className="w-full min-h-[calc(100vh-10rem)] flex-1  flex items-center justify-center">
           {fetching || !userFetched ? (
             <>
               <div className="loader"></div>

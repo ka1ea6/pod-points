@@ -85,18 +85,18 @@ export async function changeRequestStatus(
     },
   });
 
-  if (request.task) {
-    const taskId = getId(request.task);
-    const task = await payload.update({
-      collection: "tasks",
-      id: taskId,
-      data: {
-        status: status === "approved" ? "approved" : "in-progress",
-      },
-    });
+  // if (request.task) {
+  //   const taskId = getId(request.task);
+  //   const task = await payload.update({
+  //     collection: "tasks",
+  //     id: taskId,
+  //     data: {
+  //       status: status === "approved" ? "approved" : "in-progress",
+  //     },
+  //   });
 
-    return { request, task, status: "success" };
-  }
+  //   return { request, task, status: "success" };
+  // }
 
   return { request, status: "success" };
 }
